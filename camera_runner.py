@@ -1,9 +1,7 @@
 import cv2 as cv
-from time import sleep
 from keys import KeyMap
 from messages import Messages as msg
-from messages import Errors as err
-from Logger import Logger
+from logger import Logger
 
 
 class Camera:
@@ -13,15 +11,22 @@ class Camera:
     retake_time = 3
 
     def __init__(self):
-        self.v_cap = cv.VideoCapture(0)
-        if self.v_cap is None:
-            err.error(msg.NoCam)
+        """
+        Initialize the Camera for scanning
+        """
+        self._v_cap = cv.VideoCapture(0)
+        if self._v_cap is None:
+            Logger(msg.Errors.NoCam, level=Logger.warning).log()
+            # TODO: pass to user and password login
 
-        self.pic = None
-        self.last_frame = None
+        self._pic = None
+        self._last_frame = None
 
     def run(self):
-        Logger.log_instruction(msg.TakePic)
+        """
+        Run the camera UI to capture an image of the user
+        """
+        Logger(msg.TakePic, level=Logger.message).log()
         taken = False
 
         while True:
@@ -40,7 +45,7 @@ class Camera:
             # taking the image
             elif key == ord(KeyMap.take_pic):
                 cv.imshow(Camera.window_name, self.freeze())
-                Logger.log_instruction(msg.RetakePic)
+                Logger(msg.Info.RetakePic, level=Logger.message).log()
                 taken = True
 
                 while True:
@@ -48,25 +53,36 @@ class Camera:
                     key = cv.waitKey(1)
 
                     if key == ord(KeyMap.close_cam):
-                        Logger.log_instruction(msg.PicTaken)
+                        Logger(msg.Info.PicTaken, level=Logger.message).log()
                         return
                     elif key == ord(KeyMap.take_pic):
-                        Logger.log_instruction(msg.TakePic)
+                        Logger(msg.Info.TakePic, level=Logger.message).log()
                         break
 
-
     def read_stream(self):
-        ret, frame = self.v_cap.read()
-        self.pic = frame if frame is not None else self.last_frame
-        self.last_frame = self.pic
+        """
+        Read a frame from the camera
+        """
+        ret, frame = self._v_cap.read()
+        self._pic = frame if frame is not None else self._last_frame
+        self._last_frame = self._pic
 
     def prepare_presentation(self):
-        image = self.pic.copy()
+        """
+        Resize image for later presentation
+        """
+        image = self._pic.copy()
         h, w, _ = image.shape
         cv.resize(image, (int(Camera.default_size * w/h), Camera.default_size))
         return image
 
     def freeze(self):
+        """
+        Create a frozen frame representation
+        """
         image = self.prepare_presentation()
         cv.rectangle(image, (0, 0), (image.shape[1], image.shape[0]), Camera.freeze_color, 2)
         return image
+
+    def get_pic(self):
+        return self._pic.copy()
