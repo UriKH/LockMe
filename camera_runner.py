@@ -16,7 +16,7 @@ class Camera:
         """
         self._v_cap = cv.VideoCapture(0)
         if self._v_cap is None:
-            Logger(msg.Errors.NoCam, level=Logger.warning).log()
+            Logger(msg.Errors.no_cam, level=Logger.warning).log()
             # TODO: pass to user and password login
 
         self._pic = None
@@ -45,7 +45,7 @@ class Camera:
             # taking the image
             elif key == ord(KeyMap.take_pic):
                 cv.imshow(Camera.window_name, self.freeze())
-                Logger(msg.Info.RetakePic, level=Logger.message).log()
+                Logger(msg.Info.retake_pic, level=Logger.message).log()
                 taken = True
 
                 while True:
@@ -53,10 +53,10 @@ class Camera:
                     key = cv.waitKey(1)
 
                     if key == ord(KeyMap.close_cam):
-                        Logger(msg.Info.PicTaken, level=Logger.message).log()
+                        Logger(msg.Info.pic_taken, level=Logger.message).log()
                         return
                     elif key == ord(KeyMap.take_pic):
-                        Logger(msg.Info.TakePic, level=Logger.message).log()
+                        Logger(msg.Info.take_pic, level=Logger.message).log()
                         break
 
     def read_stream(self):

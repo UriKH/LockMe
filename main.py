@@ -6,7 +6,7 @@ import ui
 
 
 def main():
-    Logger(msg.Info.HelloWorld, level=Logger.message).log()
+    Logger(msg.Info.hello_world, level=Logger.message).log()
 
     # activate and run the camera
     cam = Camera()
