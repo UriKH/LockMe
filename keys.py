@@ -7,3 +7,5 @@ class KeyMap:
     take_pic = 't'
     close_cam = 'c'
     retake_pic = 'r'
+    yes = 'y'
+    no = 'n'

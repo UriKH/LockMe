@@ -9,9 +9,8 @@ class Encryption:
     def __init__(self, path, key, suffix, is_db=False):
         self.key = key if not is_db else Encryption.__get_db_key()
         self.fernet = Fernet(self.key)
-        self.path = path
 
-        clean_path = self.path.split('.')[:-1]
+        clean_path = '.'.join(path.split('.')[:-1])
         self.locked_path = '.'.join([clean_path, 'locked'])
         self.org_path = '.'.join([clean_path, suffix])
 
