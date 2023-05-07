@@ -62,7 +62,7 @@ class Encryption:
             winreg.SetValueEx(reg_key, 'db_key', 0, value_type, enc_key)
             winreg.CloseKey(reg_key)
         except not WindowsError:
-            Logger(msg.Errors.db_no_enc_key, level=Logger.exception).log()
+            Logger(msg.Errors.db_no_enc_key, level=Logger.exception).log(Encryption.__get_db_key)
 
         if enc_key is None:
             Logger(msg.Errors.BUG, level=Logger.error).log()

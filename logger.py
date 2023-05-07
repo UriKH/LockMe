@@ -36,17 +36,31 @@ class Logger:
             return result
         return wrapper
 
-    def log(self):
+    def log(self, func=None):
         if self.level == Logger.message:        # message
             print(f'>  {self.msg}', end=self.end)
+            return
+        elif func is None:
+            if self.level == Logger.info:           # info - green
+                print(f'{Logger.Colors.green}[INFO] {self.msg}', end=self.end)
+            elif self.level == Logger.warning:      # warning - yellow
+                print(f'{Logger.Colors.yellow}[WARNING] {self.msg}', end=self.end)
+            elif self.level == Logger.inform:       # does not raise exception - yellow
+                print(f'{Logger.Colors.red}[EXCEPT] {self.msg}', end=self.end)
+            elif self.level == Logger.exception:    # exception - red
+                raise Exception(f'{Logger.Colors.red}[EXCEPT] {self.msg}{self.end}')
+            elif self.level == Logger.error:        # fatal error - red
+                print(f'{Logger.Colors.red}[ERROR] {self.msg}\n\terror - exiting', end=self.end)
+                exit(1)
+            return
         if self.level == Logger.info:           # info - green
-            print(f'{Logger.Colors.green}[INFO] {self.msg}', end=self.end)
+            print(f'{Logger.Colors.green}[INFO] {self.msg} in {func.__name__}', end=self.end)
         elif self.level == Logger.warning:      # warning - yellow
-            print(f'{Logger.Colors.yellow}[WARNING] {self.msg}', end=self.end)
+            print(f'{Logger.Colors.yellow}[WARNING] {self.msg} in {func.__name__}', end=self.end)
         elif self.level == Logger.inform:       # does not raise exception - yellow
-            print(f'{Logger.Colors.red}[EXCEPT] {self.msg}', end=self.end)
+            print(f'{Logger.Colors.red}[EXCEPT] {self.msg} in {func.__name__}', end=self.end)
         elif self.level == Logger.exception:    # exception - red
-            raise Exception(f'{Logger.Colors.red}[EXCEPT] {self.msg}{self.end}')
+            raise Exception(f'{Logger.Colors.red}[EXCEPT] {self.msg} in {func.__name__}{self.end}')
         elif self.level == Logger.error:        # fatal error - red
-            print(f'{Logger.Colors.red}[ERROR] {self.msg}\n\terror - exiting', end=self.end)
+            print(f'{Logger.Colors.red}[ERROR] {self.msg} in {func.__name__}\n\terror - exiting', end=self.end)
             exit(1)

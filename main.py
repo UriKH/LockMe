@@ -31,11 +31,12 @@ def main(path=None):
             join = ui.continue_to_system()
             if join:
                 uid = Init.database.create_new_user(user.embedding)
+                print(f'new UID: {uid}')
             else:
                 Logger(msg.Info.goodbye, Logger.message).log()
                 exit(0)
     except Exception as e:
-        Logger(e, level=Logger.inform).log()
+        Logger(e, level=Logger.inform).log(main)
     finally:
         del Init.database
 
