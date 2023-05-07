@@ -2,6 +2,8 @@ import tensorflow as tf
 import cv2 as cv
 import numpy as np
 import math
+import torch
+from PIL import Image as PImage
 
 from CNN.initialize import Init
 from logger import Logger
@@ -22,68 +24,94 @@ class Image(Init):
         self.image = cv.cvtColor(self.image, cv.COLOR_RGB2BGR)
         self.x_pos, self.y_pos = None, None
 
-    @staticmethod
-    def preprocess(image, shape):
-        new_img = image.copy()
-        new_img = cv.resize(new_img, shape)
-        new_img = np.around(np.array(new_img) / 255.0, decimals=12)
-        return new_img
+    # @staticmethod
+    # def preprocess(image, shape):
+    #     new_img = image.copy()
+    #     new_img = cv.resize(new_img, shape)
+    #     new_img = np.around(np.array(new_img) / 255.0, decimals=12)
+    #     return new_img
 
-    @staticmethod
-    @Logger(msg.Info.embeddings_generated, Logger.info).time_it
-    def get_embeddings(faces):
-        faces = [Image.preprocess(face, (160, 160)) for face in faces]
-        embeddings = Init.facenet_model.embeddings(faces)
-        for i, embedding in enumerate(embeddings):
-            embeddings[i] = embedding / np.linalg.norm(embedding, ord=2)
-
-        Logger(msg.Info.embeddings_generated, level=Logger.info)
-        return embeddings
+    # @staticmethod
+    # @Logger(msg.Info.embeddings_generated, Logger.info).time_it
+    # def get_embeddings(faces):
+    #     faces = [Image.preprocess(face, (160, 160)) for face in faces]
+    #     embeddings = Init.facenet_model.embeddings(faces)
+    #     for i, embedding in enumerate(embeddings):
+    #         embeddings[i] = embedding / np.linalg.norm(embedding, ord=2)
+    #
+    #     Logger(msg.Info.embeddings_generated, level=Logger.info)
+    #     return embeddings
 
     @Logger(msg.Info.faces_located, Logger.info).time_it
     def __get_coords(self):
-        faces_data = Init.facenet_model.extract(self.image)
-        coords = [tuple(face['box']) for face in faces_data if face['confidence'] > Image.conf_thresh]
-        return coords
+        # faces_data = Init.facenet_model.extract(self.image)
+        # coords = [tuple(face['box']) for face in faces_data if face['confidence'] > Image.conf_thresh]
+        # return coords
+        boxes, conf = Init.mtcnn.detect(self.image)
+        boxes = boxes.astype(int)
+        boxes = [box for i, box in enumerate(boxes) if conf[i] >= Image.conf_thresh]
+        return boxes
 
-    def __extract_faces(self, coords):
-        height, width, _ = self.image.shape
+    # def __extract_faces(self, coords):
+    #         height, width, _ = self.image.shape
+    #
+    #         faces = list()
+    #         for x, y, w, h in coords:
+    #             x -= Image.buffer if x - Image.buffer >= 0 else 0
+    #             y -= Image.buffer if y - Image.buffer >= 0 else 0
+    #             w = w + 2 * Image.buffer if x + w + 2 * Image.buffer < width else width - x
+    #             h = h + 2 * Image.buffer if y + h + 2 * Image.buffer < height else height - y
+    #
+    #             face_crop = self.image[y: y + h, x: x + w]
+    #             if w == h:
+    #                 faces.append(face_crop)
+    #                 continue
+    #
+    #             noise_shape = (h, h, 3) if h > w else (w, w, 3)
+    #             noise = tf.random.uniform(shape=noise_shape, minval=0, maxval=255, dtype=tf.int32)
+    #             noise_img = noise.numpy().astype(np.uint8)
+    #
+    #             if h > w:
+    #                 center = math.floor((h - w) / 2)
+    #                 noise_img[:, center: center + w, :] = face_crop
+    #             else:
+    #                 center = math.floor((w - h) / 2)
+    #                 noise_img[center: center + h, :, :] = face_crop
+    #
+    #             faces.append(noise_img)
+    #         return faces
 
-        faces = list()
-        for x, y, w, h in coords:
-            x -= Image.buffer if x - Image.buffer >= 0 else 0
-            y -= Image.buffer if y - Image.buffer >= 0 else 0
-            w = w + 2 * Image.buffer if x + w + 2 * Image.buffer < width else width - x
-            h = h + 2 * Image.buffer if y + h + 2 * Image.buffer < height else height - y
+    @staticmethod
+    def xyxy_to_xywh(box):
+        return box[0], box[1], box[2] - box[0], box[3] - box[1]
 
-            face_crop = self.image[y: y + h, x: x + w]
-            if w == h:
-                faces.append(face_crop)
-                continue
-
-            noise_shape = (h, h, 3) if h > w else (w, w, 3)
-            noise = tf.random.uniform(shape=noise_shape, minval=0, maxval=255, dtype=tf.int32)
-            noise_img = noise.numpy().astype(np.uint8)
-
-            if h > w:
-                center = math.floor((h - w) / 2)
-                noise_img[:, center: center + w, :] = face_crop
-            else:
-                center = math.floor((w - h) / 2)
-                noise_img[center: center + h, :, :] = face_crop
-
-            faces.append(noise_img)
-        return faces
-
+    @Logger(msg.Info.embeddings_generated, Logger.info).time_it
     def create_embeddings(self):
-        for coord in self.__get_coords():
-            self.embeddings_dict[coord] = None
+        faces = []
+        for box in self.__get_coords():
+            x1, y1, x2, y2 = box
+            temp_img = PImage.fromarray(self.image[y1: y2, x1: x2])
+            x_aligned = Init.mtcnn(temp_img)
+            if x_aligned is None:
+                continue
+            faces.append(x_aligned)
+            self.embeddings_dict[Image.xyxy_to_xywh(box)] = None
         if len(self.embeddings_dict.keys()) == 0:
             return
 
-        faces = self.__extract_faces(self.embeddings_dict.keys())
-        for coord, embedding in zip(self.embeddings_dict.keys(), Image.get_embeddings(faces)):
-            self.embeddings_dict[coord] = embedding
+        aligned = torch.stack(faces).to(Init.device)
+        embeddings = Init.resnet(aligned).detach().cpu()
+        for box, embedding in zip(self.embeddings_dict.keys(), embeddings):
+            self.embeddings_dict[box] = embedding
+
+        # for coord in self.__get_coords():
+        #     self.embeddings_dict[coord] = None
+        # if len(self.embeddings_dict.keys()) == 0:
+        #     return
+
+        # faces = self.__extract_faces(self.embeddings_dict.keys())
+        # for coord, embedding in zip(self.embeddings_dict.keys(), Image.get_embeddings(faces)):
+        #     self.embeddings_dict[coord] = embedding
 
     def choose_face(self):
         from camera_runner import Camera

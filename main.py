@@ -1,3 +1,5 @@
+import cv2 as cv
+
 from camera_runner import Camera
 from messages import Messages as msg
 from user_login import User
@@ -6,16 +8,18 @@ import ui
 from CNN.initialize import Init
 
 
-def main():
+def main(path=None):
     try:
         Logger(msg.Info.hello_world, level=Logger.message).log()
 
         Init()
-
-        # activate and run the camera
-        cam = Camera()
-        cam.run()
-        user_img = cam.get_pic()
+        if path is None:
+            user_img = cv.imread(r"C:\Users\urikh\OneDrive\pictures\Camera Roll\WIN_20200315_10_49_03_Pro.jpg")
+        else:
+            # activate and run the camera
+            cam = Camera()
+            cam.run()
+            user_img = cam.get_pic()
         user = User(user_img)
 
         if user.valid:
@@ -37,4 +41,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main(path=True)

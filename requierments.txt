@@ -1,6 +1,7 @@
 keras_facenet
 facenet_pytorch
 torchvision
+tensorflow
 torch
 numpy
 opencv-python

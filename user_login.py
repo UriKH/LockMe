@@ -1,4 +1,6 @@
 import numpy as np
+import torch
+
 from CNN.image_process import Image
 from CNN.initialize import Init
 from database import Database
@@ -17,8 +19,8 @@ class User:
         min_dist = 100.
         identity = None
 
-        for uid, em in data:
-            dist = np.linalg.norm(np.array(list(em)) - self.embedding)
+        for uid, e in data:
+            dist = (torch.tensor(list(e)) - self.embedding).norm()
             if dist < min_dist:
                 min_dist = dist
                 identity = uid
