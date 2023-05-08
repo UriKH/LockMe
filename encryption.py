@@ -21,7 +21,7 @@ class Encryption:
 
         with open(self.org_path, 'wb') as f:
             f.write(enc_data)
-            Logger(f'{msg.Info.file_encrypt} - path is {self.locked_path}', Logger.info).log()
+            Logger(f'{msg.Info.file_encrypt} - path is {self.locked_path}', Logger.warning).log()
 
         os.rename(self.org_path, self.locked_path)
         return True
@@ -33,7 +33,7 @@ class Encryption:
 
         with open(self.locked_path, 'wb') as f:
             f.write(raw_data)
-            Logger(f'{msg.Info.file_decrypt} - path is {self.org_path}', Logger.info).log()
+            Logger(f'{msg.Info.file_decrypt} - path is {self.org_path}', Logger.warning).log()
 
         os.rename(self.locked_path, self.org_path)
 

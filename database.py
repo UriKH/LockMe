@@ -8,13 +8,11 @@ import struct
 
 
 class Database:
+    # TODO: implement all database commands
     org_path = r'.\databases\database.db'
     locked_path = r'.\databases\database.locked'
 
-    def __init__(self, exists=True):
-        """
-        :param exists:
-        """
+    def __init__(self):
         self.enc_track = Encryption(Database.locked_path, None, 'db', is_db=True)   # track encryption of the database
         if os.path.exists(Database.locked_path):
             self.enc_track.decrypt_file()
@@ -24,7 +22,7 @@ class Database:
 
         self.__init_tables()    # create the tables
 
-        self.users = self.__fetch_users()
+        self.users = self.fetch_users()
 
     def __del__(self):
         self.connection.close()
@@ -74,19 +72,15 @@ class Database:
         embedding = struct.unpack('512f', embedding_b)
         return embedding
 
-    def __fetch_users(self):
+    def fetch_users(self):
         self.cursor.execute("SELECT * FROM users")
         return self.cursor.fetchall()
 
-    def fetch_all_users_data(self):
-        self.cursor.execute("SELECT * FROM users")
-        return self.cursor.fetchall()
-
-    def _fetch_all_uids(self):
+    def _fetch_all_ids(self):
         self.cursor.execute("SELECT uid FROM users")
         return self.cursor.fetchall()
 
-    def fetch_all_files(self, uid):
+    def fetch_user_data(self, uid):
         self.cursor.execute("SELECT * FROM files WHERE uid = ?", (uid,))
         return self.cursor.fetchall()
 
@@ -106,9 +100,10 @@ class Database:
 
     def create_new_user(self, embedding):
         embedding_b = Database._embedding_to_byte(embedding)
-        uids = self._fetch_all_uids()
+        uids = self._fetch_all_ids()
         max_id = 0
-        for uid, _ in uids:     # because uids is of shape (n, )
+        for row in uids:     # because uids is of shape (n, )
+            uid = row[0]
             if uid > max_id:
                 max_id = uid
 

@@ -29,7 +29,7 @@ class User:
         return identity
 
     def login(self):
-        data = Init.database.fetch_all_users_data()
+        data = Init.database.fetch_users()
         for i, user in enumerate(data):
             data[i] = list(data[i])
             data[i][1] = Database._byte_to_embedding(user[1])

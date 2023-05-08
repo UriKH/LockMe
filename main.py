@@ -13,25 +13,25 @@ def main(path=None):
         Logger(msg.Info.hello_world, level=Logger.message).log()
 
         Init()
-        if path is None:
-            user_img = cv.imread(r"C:\Users\urikh\OneDrive\pictures\Camera Roll\WIN_20200315_10_49_03_Pro.jpg")
-        else:
-            # activate and run the camera
-            cam = Camera()
-            cam.run()
-            user_img = cam.get_pic()
+
+        # activate and run the camera
+        cam = Camera()
+        cam.run()
+        user_img = cam.get_pic()
         user = User(user_img)
+        # TODO: add async camera face check: every 10 seconds (check if the original users face is still in the frame)
 
         if user.valid:
             Logger('Access Granted', Logger.info).log()
+            Logger(msg.Info.user_login + f' {user.uid}', msg.Info).log()
             # user_data = Init.database.retrive_user_data()
-            # ui.present_menu()
+            ui.present_menu()
             # ui.present_data(data)
         else:
             join = ui.continue_to_system()
             if join:
                 uid = Init.database.create_new_user(user.embedding)
-                print(f'new UID: {uid}')
+                Logger(msg.Info.user_login + f' {uid}', msg.Info).log()
             else:
                 Logger(msg.Info.goodbye, Logger.message).log()
                 exit(0)
@@ -42,4 +42,4 @@ def main(path=None):
 
 
 if __name__ == '__main__':
-    main(path=True)
+    main(False)

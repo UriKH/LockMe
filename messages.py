@@ -22,6 +22,15 @@ class Messages:
         faces_located = 'Faces located'
         loading = 'Loading and initiating the app'
         goodbye = 'Goodbye and thank you for using LockMe'
+        single_face = 'Only one face detected, using this face by default'
+        user_login = 'User logged in with ID'
+        menu = f"""Available commands:
+ > add      [{KeyMap.add}] -> add a new file to the system
+ > remove   [{KeyMap.remove}] -> remove a file from the system
+ > trash    [{KeyMap.trash}] -> delete a file from disk
+ > delete   [{KeyMap.delete}] -> delete the user account and unlock all of its files
+ > logoff   [{KeyMap.log_off}] -> log off the system
+ > exit     [{KeyMap.exit}] -> exit the program"""
 
     class Requests:
         want_to_join = 'Hi there! you are not recognized by the system, would you like to join the system? [Y/n]'

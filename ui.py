@@ -7,10 +7,14 @@ from keys import KeyMap
 
 
 def present_menu():
-    pass
+    Logger(msg.Info.menu, Logger.info).log()
+    while True:
+        # TODO: parse user input and activate commands
+        exit(0)
 
 
 def present_data(data):
+    # TODO: write a function for data representation (maybe use pandas for table representation?)
     pass
 
 

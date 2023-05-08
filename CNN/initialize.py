@@ -7,7 +7,6 @@ import torch
 
 
 class Init:
-    facenet_model = None
     database = None
     resnet = None
     mtcnn = None
@@ -15,7 +14,6 @@ class Init:
 
     @Logger(msg.Info.loading, level=Logger.info).time_it
     def __init__(self):
-        Init.facenet_model = kfn.FaceNet()
         Init.database = db()
 
         Init.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
