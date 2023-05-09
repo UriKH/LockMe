@@ -1,8 +1,11 @@
 import os
+import numpy as np
 from cryptography.fernet import Fernet
+import winreg
+
 from logger import Logger
 from messages import Messages as msg
-import winreg
+
 
 
 class Encryption:
@@ -43,6 +46,10 @@ class Encryption:
 
     @staticmethod
     def __get_db_key():
+        """
+        Retrieve or generate the database encryption key and save it in the registry
+        :return: The database encryption key
+        """
         enc_key = None
         try:
             # try getting the key
@@ -67,3 +74,20 @@ class Encryption:
         if enc_key is None:
             Logger(msg.Errors.BUG, level=Logger.error).log()
         return enc_key.encode('utf-8')
+
+    @staticmethod
+    def key_from_embedding(embedding):
+        """
+        Generate a 128 bits key from 512 float vector
+        :param embedding: A 512 float vector representing an image
+        :return: The key generated from the vector
+        """
+        if len(embedding) < 512:
+            Logger(msg.Errors.BUG, Logger.exception).log()
+
+        embedding = [embedding[i] + embedding[i+1] for i in range(stop=512, step=2)]
+        bin_embedding = (np.array(embedding) > 0)
+        binary_string = ''.join(str(bit) for bit in bin_embedding)
+        integer = int(binary_string, 2)
+        key = integer.to_bytes(128, byteorder='big')
+        return key

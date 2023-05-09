@@ -13,28 +13,34 @@ def main(path=None):
         Logger(msg.Info.hello_world, level=Logger.message).log()
 
         Init()
-
-        # activate and run the camera
         cam = Camera()
-        cam.run()
-        user_img = cam.get_pic()
-        user = User(user_img)
-        # TODO: add async camera face check: every 10 seconds (check if the original users face is still in the frame)
 
-        if user.valid:
-            Logger('Access Granted', Logger.info).log()
-            Logger(msg.Info.user_login + f' {user.uid}', msg.Info).log()
-            # user_data = Init.database.retrive_user_data()
-            ui.present_menu()
-            # ui.present_data(data)
-        else:
-            join = ui.continue_to_system()
-            if join:
-                uid = Init.database.create_new_user(user.embedding)
-                Logger(msg.Info.user_login + f' {uid}', msg.Info).log()
+        while True:
+            # activate and run the camera
+            cam.run()
+            user_img = cam.get_pic()
+            user = User(user_img)
+            # TODO: add async camera face check: every 10 seconds (check if the original users face is still in the frame)
+
+            if user.valid:
+                Logger('Access Granted', Logger.info).log()
+                Logger(msg.Info.user_login + f' {user.uid}', msg.Info).log()
+
+                if ui.present_menu(user):
+                    Logger(msg.Info.goodbye, Logger.message).log()
+                    exit(0)
             else:
-                Logger(msg.Info.goodbye, Logger.message).log()
-                exit(0)
+                join = ui.continue_to_system()
+                if join:
+                    user.uid = Init.database.create_new_user(user.embedding)
+                    Logger(msg.Info.user_login + f' {user.uid}', msg.Info).log()
+
+                    if ui.present_menu(user):
+                        Logger(msg.Info.goodbye, Logger.message).log()
+                        exit(0)
+                else:
+                    Logger(msg.Info.goodbye, Logger.message).log()
+                    exit(0)
     except Exception as e:
         Logger(e, level=Logger.inform).log(main)
     finally:

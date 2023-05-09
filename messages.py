@@ -9,6 +9,12 @@ class Messages:
         no_cam = 'No camera available'
         file_exists = f'File does not exists in specified path'
         no_face_click = 'face was not clicked'
+        invalid_cmd = 'Command is invalid'
+        missing_param = 'Missing parameter'
+        to_many_params = 'To many parameters for this command'
+        failed_insertion = 'failed to add the file, file already has an owner'
+        access_denied = 'Access denied'
+        failed_removal = 'file is not in the system'
 
     class Info:
         hello_world = '>>> Hello there! welcome to LockMe service <<<'
@@ -18,19 +24,28 @@ class Messages:
         new_db_key = 'Congrats! new encryption key for the database was generated'
         file_encrypt = 'File encrypted'
         file_decrypt = 'File decrypted'
+        file_added = 'File added to the system'
+        file_removed = 'File removed from the system'
+        file_deleted = 'File deleted from the disk'
         embeddings_generated = 'Face embeddings generated'
         faces_located = 'Faces located'
         loading = 'Loading and initiating the app'
         goodbye = 'Goodbye and thank you for using LockMe'
+        exiting = 'Exiting'
+        logging_off = 'logging-off the current user'
         single_face = 'Only one face detected, using this face by default'
         user_login = 'User logged in with ID'
         menu = f"""Available commands:
- > add      [{KeyMap.add}] -> add a new file to the system
- > remove   [{KeyMap.remove}] -> remove a file from the system
- > trash    [{KeyMap.trash}] -> delete a file from disk
- > delete   [{KeyMap.delete}] -> delete the user account and unlock all of its files
- > logoff   [{KeyMap.log_off}] -> log off the system
- > exit     [{KeyMap.exit}] -> exit the program"""
+ > {KeyMap.add_cmd}      [{KeyMap.add}] -> add a new file to the system
+ > {KeyMap.remove_cmd}   [{KeyMap.remove}] -> remove a file from the system
+ > {KeyMap.trash_cmd}    [{KeyMap.trash}] -> delete a file from disk
+ > {KeyMap.delete_cmd}   [{KeyMap.delete}] -> delete the user account and unlock all of its files
+ > {KeyMap.log_off_cmd}   [{KeyMap.log_off}] -> log off the system
+ > {KeyMap.exit_cmd}     [{KeyMap.exit}] -> exit the program
+ > {KeyMap.show_cmd}     [{KeyMap.show}] -> list all files of the user and their status"""
+        back_to_routine = 'Back to routine'
+        checksum = 'The file\'s checksum is'
+
 
     class Requests:
         want_to_join = 'Hi there! you are not recognized by the system, would you like to join the system? [Y/n]'
