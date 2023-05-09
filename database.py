@@ -128,8 +128,9 @@ class Database:
             checksum = Database.checksum(data)
             data = Database._compress_file(data)
 
-        self.cursor.execute("INSERT INTO files (file_path, suffix, uid, file, checksum, file_state) VALUES (?, ?, ?, ?, ?, ?)",
-                            (path, suffix, uid, data, checksum, Database.file_state_open))
+        self.cursor.execute(
+            "INSERT INTO files (file_path, suffix, uid, file, checksum, file_state) VALUES (?, ?, ?, ?, ?, ?)",
+            (path, suffix, uid, data, checksum, Database.file_state_open))
         self.connection.commit()
         Logger(msg.Info.file_added + f' {path}', Logger.info).log()
         return True

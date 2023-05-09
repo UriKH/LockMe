@@ -46,7 +46,6 @@ class Messages:
         back_to_routine = 'Back to routine'
         checksum = 'The file\'s checksum is'
 
-
     class Requests:
         want_to_join = 'Hi there! you are not recognized by the system, would you like to join the system? [Y/n]'
         face_index = 'Please click on the user\'s face'

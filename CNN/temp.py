@@ -261,7 +261,7 @@ def model(X_train, Y_train, X_test, Y_test, learning_rate=0.0001,
         epoch_total_loss /= m
 
         # Print the cost every 10 epochs
-        if print_cost == True and epoch % 10 == 0:
+        if print_cost is True and epoch % 10 == 0:
             print("Cost after epoch %i: %f" % (epoch, epoch_total_loss))
             print("Train accuracy:", train_accuracy.result())
 

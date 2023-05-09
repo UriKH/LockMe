@@ -7,7 +7,6 @@ from logger import Logger
 from messages import Messages as msg
 
 
-
 class Encryption:
     def __init__(self, path, key, suffix, is_db=False):
         self.key = key if not is_db else Encryption.__get_db_key()

@@ -20,7 +20,8 @@ def main(path=None):
             cam.run()
             user_img = cam.get_pic()
             user = User(user_img)
-            # TODO: add async camera face check: every 10 seconds (check if the original users face is still in the frame)
+            # TODO: add async camera face check: every 10 seconds
+            #  (check if the original users face is still in the frame)
 
             if user.valid:
                 Logger('Access Granted', Logger.info).log()
