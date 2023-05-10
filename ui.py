@@ -62,8 +62,12 @@ def parse_n_call(cmd, line, user):
         elif cmd == KeyMap.show_cmd:
             data = Init.database.fetch_user_data(user.uid)
             present_data(data)
-        elif cmd == KeyMap.delete_cmd:
+        elif cmd == KeyMap.trash_cmd:
             delete_file(*pieces)
+        elif cmd == KeyMap.delete_cmd:
+            Init.database.delete_user(user.uid)
+            Logger(msg.Info.logging_off, Logger.message).log()
+            return False
         return None
     except Exception as e:
         Logger(e, Logger.inform).log()
@@ -136,6 +140,8 @@ def present_menu(user) -> bool:
 
     while True:
         line = input('>>> ')
+        line = line.rstrip()
+        line = line.lstrip()
         command = line.split(' ')[0]
         if command.lower() not in commands.keys() and command.lower() not in commands.values():
             Logger(msg.Errors.invalid_cmd, Logger.warning).log()

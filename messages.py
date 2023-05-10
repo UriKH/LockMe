@@ -43,6 +43,7 @@ class Messages:
         logging_off = 'logging-off the current user'
         single_face = 'Only one face detected, using this face by default'
         user_login = 'User logged in with ID'
+        user_deleted = 'User removed from the system'
 
         menu = f"""Available commands:
  > {KeyMap.add_cmd}      [{KeyMap.add}] -> add a new file to the system
@@ -62,3 +63,4 @@ class Messages:
         """
         want_to_join = 'Hi there! you are not recognized by the system, would you like to join the system? [Y/n]'
         face_index = 'Please click on the user\'s face'
+        delete_user = 'Are you sure you want to delete all user data? [y/N]'

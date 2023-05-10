@@ -2,10 +2,12 @@ import sqlite3
 import os
 import bz2 as bz
 import struct
+import cv2 as cv
 
 from encryption import Encryption
 from logger import Logger
 from messages import Messages as msg
+from keys import KeyMap
 
 
 class Database:
@@ -380,3 +382,47 @@ class Database:
             self.cursor.execute("UPDATE files SET file_state = ? WHERE file_path = ?",
                                 (Database.file_state_locked, path))
             self.connection.commit()
+
+    def unlock_all_files(self, uid=None):
+        """
+        Unlock all files owned by the specified ID. If no ID is specified, unlock all the system files
+        :param uid: user ID
+        """
+        data_dict = self.fetch_user_data()
+        for i, path in enumerate(data_dict['file_path']):
+            # file is already locked
+            if data_dict['file_state'][i] == Database.file_state_open:
+                continue
+
+            if uid is not None:
+                if uid != data_dict['user_id'][i]:
+                    continue
+
+            # encrypt the file
+            key = self.get_user_embedding_as_key(data_dict['user_id'][i])
+            file_enc = Encryption(path, key, data_dict['suffix'][i])
+            file_enc.decrypt_file()
+
+            # change the file state in the database
+            self.cursor.execute("UPDATE files SET file_state = ? WHERE file_path = ?",
+                                (Database.file_state_open, path))
+            self.connection.commit()
+
+    def delete_user(self, uid):
+        """
+        Delete a user from the system
+        :param uid: the user ID
+        :return: True if deleted and False if aborted
+        """
+        Logger(msg.Requests.delete_user, level=Logger.message).log()
+        while True:
+            key = cv.waitKey()
+            if key == ord(KeyMap.yes):
+                self.unlock_all_files(uid)
+                self.cursor.execute("DELETE FROM files WHERE uid = ?", (uid,))
+                self.cursor.execute("DELETE FROM users WHERE uid = ?", (uid,))
+                self.connection.commit()
+                Logger(msg.Info.user_deleted + f' - ID: {uid}', Logger.warning).log()
+                return True
+            elif key == ord(KeyMap.no):
+                return False
