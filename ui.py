@@ -2,11 +2,13 @@
 # this class will define the outputs which are not from the terminal
 import cv2 as cv
 import os
+import pandas as pd
 
 from logger import Logger
 from messages import Messages as msg
 from keys import KeyMap
 from CNN.initialize import Init
+from database import Database
 
 commands = {KeyMap.exit_cmd: KeyMap.exit, KeyMap.add_cmd: KeyMap.add, KeyMap.remove_cmd: KeyMap.remove,
             KeyMap.delete_cmd: KeyMap.delete, KeyMap.trash_cmd: KeyMap.trash,
@@ -59,8 +61,20 @@ def parse_n_call(cmd, line, user):
 
 
 def present_data(data):
-    # TODO: write a function for data representation (maybe use pandas for table representation?)
-    print('temp data representation is Null')
+    """
+    Present the data of the user
+    :param data: a dictionary representing the user's data
+    """
+    data = data.copy()
+    del data['file']
+    del data['user_id']
+    data['file_state'] = ['locked' if state == Database.file_state_close else 'open' for state in data['file_state']]
+
+    df = pd.DataFrame(data)
+    pd.set_option('display.max_rows', None)
+    pd.set_option('display.max_columns', None)
+
+    Logger(df, Logger.message).log()
 
 
 def delete_file(path):
@@ -108,7 +122,7 @@ def present_menu(user) -> bool:
     :param user: An object of User class
     :return: True if program should exit, False if log-off
     """
-    Logger(msg.Info.menu, Logger.info).log()
+    Logger(msg.Info.menu, Logger.message).log()
 
     while True:
         line = input('>>> ')

@@ -102,10 +102,21 @@ class Database:
         """
         Retrieve the user's data
         :param uid: the current user ID
-        :return: the user's data
+        :return: the user's data as a dictionary:
+            {'file_path': [...], 'suffix': [...], 'user_id': [...], 'file': [...], 'checksum': [...],
+            'file_state': [...]}
         """
-        self.cursor.execute("SELECT * FROM files WHERE uid = ?", (uid,))
-        return self.cursor.fetchall()
+        self.cursor.execute("SELECT file_path, suffix, uid, file, checksum, file_state FROM files WHERE uid = ?", (uid,))
+        data = self.cursor.fetchall()
+        data_dict = {'file_path': [], 'suffix': [], 'user_id': [], 'file': [], 'checksum': [], 'file_state': []}
+        for row in data:
+            data_dict['file_path'].append(row[0])
+            data_dict['suffix'].append(row[1])
+            data_dict['user_id'].append(row[2])
+            data_dict['file'].append(row[3])
+            data_dict['checksum'].append(row[4])
+            data_dict['file_state'].append(row[5])
+        return data_dict
 
     def add_file(self, path, uid):
         """
