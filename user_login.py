@@ -1,4 +1,3 @@
-import numpy as np
 import torch
 
 from image_process import Image
@@ -16,6 +15,11 @@ class User:
         self.valid = self.login()
 
     def check_similarity(self, data):
+        """
+        Get the user ID
+        :param data: data as [(ID, embedding) ...]
+        :return: the ID of the user if in the DB else None
+        """
         min_dist = 100.
         identity = None
 
@@ -29,6 +33,10 @@ class User:
         return identity
 
     def login(self):
+        """
+        Try to log in with the current user
+        :return: if the user is in the system or not
+        """
         data = Init.database.fetch_users()
         for i, user in enumerate(data):
             data[i] = list(data[i])

@@ -426,3 +426,13 @@ class Database:
                 return True
             elif key == ord(KeyMap.no):
                 return False
+
+    def recover_file(self, path, user):
+        # check if action is valid on the file
+        valid, db_data = self.__validate_action_on_file(path, user)
+        if not valid:
+            return False
+
+        key = self.get_user_embedding_as_key(user.uid)
+        file_enc = Encryption(path, key, db_data['suffix'])
+        Database._recover(path, db_data['file'], key, file_enc.locked_path)

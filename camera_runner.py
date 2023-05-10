@@ -56,7 +56,7 @@ class Camera:
         try:
             ret, frame = self._v_cap.read()
         except Exception as e:
-            Logger(f'{e}. Please re run the program', Logger.error).log(self.read_stream)
+            Logger(f'{e}. Please rerun the program', Logger.error).log(self.read_stream)
         self._pic = frame if frame is not None else self._last_frame
         self._last_frame = self._pic
 

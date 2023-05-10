@@ -27,5 +27,4 @@ class KeyMap:
     show_cmd = 'show'
     lock_cmd = 'lock'
     unlock_cmd = 'unlock'
-
-
+    recover_cmd = 'recover'

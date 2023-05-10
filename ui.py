@@ -13,10 +13,11 @@ from database import Database
 commands = {KeyMap.exit_cmd: KeyMap.exit, KeyMap.add_cmd: KeyMap.add, KeyMap.remove_cmd: KeyMap.remove,
             KeyMap.delete_cmd: KeyMap.delete, KeyMap.trash_cmd: KeyMap.trash,
             KeyMap.log_off_cmd: KeyMap.log_off, KeyMap.show_cmd: KeyMap.show, KeyMap.lock_cmd: KeyMap.lock,
-            KeyMap.unlock_cmd: KeyMap.unlock}
+            KeyMap.unlock_cmd: KeyMap.unlock, KeyMap.recover_cmd: KeyMap.recover_cmd}
 
 cmd_param = {KeyMap.add_cmd: 1, KeyMap.remove_cmd: 1, KeyMap.delete_cmd: 0, KeyMap.trash_cmd: 1,
-             KeyMap.log_off_cmd: 0, KeyMap.show_cmd: 0, KeyMap.exit_cmd: 0, KeyMap.lock_cmd: 1, KeyMap.unlock_cmd: 1}
+             KeyMap.log_off_cmd: 0, KeyMap.show_cmd: 0, KeyMap.exit_cmd: 0, KeyMap.lock_cmd: 1, KeyMap.unlock_cmd: 1,
+             KeyMap.recover_cmd: 1}
 
 
 def parse_n_call(cmd, line, user):
@@ -54,6 +55,7 @@ def parse_n_call(cmd, line, user):
             Init.database.unlock_file(*pieces, user)
         elif cmd == KeyMap.exit_cmd:
             Logger(msg.Info.exiting, Logger.message).log()
+            Init.database.lock_all_files()
             return True
         elif cmd == KeyMap.log_off_cmd:
             Logger(msg.Info.logging_off, Logger.message).log()
@@ -63,11 +65,13 @@ def parse_n_call(cmd, line, user):
             data = Init.database.fetch_user_data(user.uid)
             present_data(data)
         elif cmd == KeyMap.trash_cmd:
-            delete_file(*pieces)
+            delete_file(*pieces, user)
         elif cmd == KeyMap.delete_cmd:
             Init.database.delete_user(user.uid)
             Logger(msg.Info.logging_off, Logger.message).log()
             return False
+        elif cmd == KeyMap.recover_cmd:
+            Init.database.recover_file(*pieces, user)
         return None
     except Exception as e:
         Logger(e, Logger.inform).log()
@@ -91,12 +95,13 @@ def present_data(data):
     Logger(df, Logger.message).log()
 
 
-def delete_file(path):
+def delete_file(path, user):
     """
     Delete a file from disk
     :param path: the path to the file
     """
     try:
+        remove_file(path, user)
         os.remove(path)
         Logger(msg.Info.file_deleted + f' {path}', Logger.warning).log()
     except Exception as e:

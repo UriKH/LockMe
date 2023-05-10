@@ -1,5 +1,3 @@
-import cv2 as cv
-
 from camera_runner import Camera
 from messages import Messages as msg
 from user_login import User
@@ -20,8 +18,6 @@ def main():
             cam.run()
             user_img = cam.get_pic()
             user = User(user_img)
-            # TODO: add async camera face check: every 10 seconds
-            #  (check if the original users face is still in the frame)
 
             if user.valid:
                 Logger('Access Granted', Logger.info).log()
