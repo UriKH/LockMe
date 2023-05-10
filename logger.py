@@ -27,6 +27,11 @@ class Logger:
             self.end = f'{Logger.Colors.white} '
 
     def time_it(self, func):
+        """
+        Decorator to log the processing time of a function
+        :param func: the function to time
+        :return: the wrapped function
+        """
         def wrapper(*args, **kwarg):
             start = time.time()
             result = func(*args, **kwarg)
@@ -37,6 +42,10 @@ class Logger:
         return wrapper
 
     def log(self, func=None):
+        """
+        Log a message with it's logging level to the standard output
+        :param func: function the logger is called from
+        """
         if self.level == Logger.message:        # message
             print(f'>  {self.msg}', end=self.end)
             return
@@ -46,7 +55,7 @@ class Logger:
             elif self.level == Logger.warning:      # warning - yellow
                 print(f'{Logger.Colors.yellow}[WARNING] {self.msg}', end=self.end)
             elif self.level == Logger.inform:       # does not raise exception - yellow
-                print(f'{Logger.Colors.red}[EXCEPT] {self.msg}', end=self.end)
+                print(f'{Logger.Colors.red}[EXCEPT/ERROR] {self.msg}', end=self.end)
             elif self.level == Logger.exception:    # exception - red
                 raise Exception(f'{Logger.Colors.red}[EXCEPT] {self.msg}{self.end}')
             elif self.level == Logger.error:        # fatal error - red
@@ -58,7 +67,7 @@ class Logger:
         elif self.level == Logger.warning:      # warning - yellow
             print(f'{Logger.Colors.yellow}[WARNING] {self.msg} in {func.__name__}', end=self.end)
         elif self.level == Logger.inform:       # does not raise exception - yellow
-            print(f'{Logger.Colors.red}[EXCEPT] {self.msg} in {func.__name__}', end=self.end)
+            print(f'{Logger.Colors.red}[EXCEPT/ERROR] {self.msg} in {func.__name__}', end=self.end)
         elif self.level == Logger.exception:    # exception - red
             raise Exception(f'{Logger.Colors.red}[EXCEPT] {self.msg} in {func.__name__}{self.end}')
         elif self.level == Logger.error:        # fatal error - red

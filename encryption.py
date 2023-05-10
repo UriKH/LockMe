@@ -8,7 +8,6 @@ from logger import Logger
 from messages import Messages as msg
 
 
-
 class Encryption:
     def __init__(self, path, key, suffix, is_db=False):
         self.key = key if not is_db else Encryption.__get_db_key()
@@ -19,6 +18,10 @@ class Encryption:
         self.org_path = '.'.join([clean_path, suffix])
 
     def encrypt_file(self):
+        """
+        Encrypt the file
+        :return: the encrypted file contents
+        """
         with open(self.org_path, 'rb') as file:
             raw_data = file.read()
             enc_data = self.fernet.encrypt(raw_data)
@@ -31,6 +34,10 @@ class Encryption:
         return enc_data
 
     def decrypt_file(self):
+        """
+        Decrypt the file
+        :return: the decrypted contents
+        """
         with open(self.locked_path, 'rb') as file:
             enc_data = file.read()
             raw_data = self.fernet.decrypt(enc_data)
@@ -44,6 +51,10 @@ class Encryption:
 
     @staticmethod
     def generate_key():
+        """
+        Generate a fernet encryption key
+        :return: the key
+        """
         return Fernet.generate_key()
 
     @staticmethod
@@ -96,13 +107,23 @@ class Encryption:
         return key
 
     @staticmethod
-    def encrypt_data(data, embedding):
-        key = Encryption.key_from_embedding(embedding)
+    def encrypt_data(data, key):
+        """
+        Encrypt some data with a fernet key
+        :param data: the data
+        :param key: the fernet key
+        :return: the encrypted data
+        """
         fernet = Fernet(key)
         return fernet.encrypt(data)
 
     @staticmethod
-    def decrypt_data(data, embedding):
-        key = Encryption.key_from_embedding(embedding)
+    def decrypt_data(data, key):
+        """
+        Decrypt some data with a fernet key
+        :param data: the data
+        :param key: the fernet key
+        :return: the decrypted data
+        """
         fernet = Fernet(key)
         return fernet.decrypt(data)

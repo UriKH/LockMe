@@ -8,7 +8,7 @@ import ui
 from CNN.initialize import Init
 
 
-def main(path=None):
+def main():
     try:
         Logger(msg.Info.hello_world, level=Logger.message).log()
 
@@ -49,4 +49,4 @@ def main(path=None):
 
 
 if __name__ == '__main__':
-    main(False)
+    main()

@@ -12,10 +12,11 @@ from database import Database
 
 commands = {KeyMap.exit_cmd: KeyMap.exit, KeyMap.add_cmd: KeyMap.add, KeyMap.remove_cmd: KeyMap.remove,
             KeyMap.delete_cmd: KeyMap.delete, KeyMap.trash_cmd: KeyMap.trash,
-            KeyMap.log_off_cmd: KeyMap.log_off, KeyMap.show_cmd: KeyMap.show}
+            KeyMap.log_off_cmd: KeyMap.log_off, KeyMap.show_cmd: KeyMap.show, KeyMap.lock_cmd: KeyMap.lock,
+            KeyMap.unlock_cmd: KeyMap.unlock}
 
 cmd_param = {KeyMap.add_cmd: 1, KeyMap.remove_cmd: 1, KeyMap.delete_cmd: 0, KeyMap.trash_cmd: 1,
-             KeyMap.log_off_cmd: 0, KeyMap.show_cmd: 0, KeyMap.exit_cmd: 0}
+             KeyMap.log_off_cmd: 0, KeyMap.show_cmd: 0, KeyMap.exit_cmd: 0, KeyMap.lock_cmd: 1, KeyMap.unlock_cmd: 1}
 
 
 def parse_n_call(cmd, line, user):
@@ -42,22 +43,31 @@ def parse_n_call(cmd, line, user):
         Logger(msg.Errors.to_many_params, Logger.warning).log()
         return None
 
-    if cmd == KeyMap.add_cmd:
-        add_file(*pieces, user)
-    elif cmd == KeyMap.remove_cmd:
-        remove_file(*pieces, user)
-    elif cmd == KeyMap.exit_cmd:
-        Logger(msg.Info.exiting, Logger.message).log()
-        return True
-    elif cmd == KeyMap.log_off_cmd:
-        Logger(msg.Info.logging_off, Logger.message).log()
-        return False
-    elif cmd == KeyMap.show_cmd:
-        data = Init.database.fetch_user_data(user.uid)
-        present_data(data)
-    elif cmd == KeyMap.delete_cmd:
-        delete_file(*pieces)
-    return None
+    try:
+        if cmd == KeyMap.add_cmd:
+            Init.database.add_file(*pieces, user)
+        elif cmd == KeyMap.remove_cmd:
+            Init.database.remove_file(*pieces, user)
+        elif cmd == KeyMap.lock_cmd:
+            Init.database.lock_file(*pieces, user)
+        elif cmd == KeyMap.unlock_cmd:
+            Init.database.unlock_file(*pieces, user)
+        elif cmd == KeyMap.exit_cmd:
+            Logger(msg.Info.exiting, Logger.message).log()
+            return True
+        elif cmd == KeyMap.log_off_cmd:
+            Logger(msg.Info.logging_off, Logger.message).log()
+            Init.database.lock_all_files(user.uid)
+            return False
+        elif cmd == KeyMap.show_cmd:
+            data = Init.database.fetch_user_data(user.uid)
+            present_data(data)
+        elif cmd == KeyMap.delete_cmd:
+            delete_file(*pieces)
+        return None
+    except Exception as e:
+        Logger(e, Logger.inform).log()
+        Logger(msg.Info.back_to_routine, Logger.info).log()
 
 
 def present_data(data):
@@ -107,7 +117,7 @@ def remove_file(path, user):
     """
     Remove a file from the user's account
     :param path: path to the file to remove
-    :param uid: the ID of the current user
+    :param user: a User object
     """
     try:
         Init.database.remove_file(path, user)

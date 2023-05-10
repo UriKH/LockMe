@@ -23,17 +23,20 @@ class Image(Init):
 
     @Logger(msg.Info.faces_located, Logger.info).time_it
     def __get_coords(self):
+        """
+        Get the faces bounding boxes in the image
+        :return: a list of the bounding boxes
+        """
         boxes, conf = Init.mtcnn.detect(self.image)
         boxes = boxes.astype(int)
         boxes = [box for i, box in enumerate(boxes) if conf[i] >= Image.conf_thresh]
         return boxes
 
-    @staticmethod
-    def xyxy_to_xywh(box):
-        return box[0], box[1], box[2] - box[0], box[3] - box[1]
-
     @Logger(msg.Info.embeddings_generated, Logger.info).time_it
     def create_embeddings(self):
+        """
+        Create an embedding of the detected face
+        """
         faces = []
         for box in self.__get_coords():
             x1, y1, x2, y2 = box
@@ -52,6 +55,9 @@ class Image(Init):
             self.embeddings_dict[box] = embedding
 
     def choose_face(self):
+        """
+        Choose a face to run on
+        """
         from camera_runner import Camera
 
         if len(self.embeddings_dict.keys()) == 1:
@@ -66,6 +72,7 @@ class Image(Init):
 
         cv.setMouseCallback(Camera.window_name, mouse_callback)
 
+        # draw a number box on the face
         new_img = self.image
         for i, (x1, y1, x2, y2) in enumerate(self.embeddings_dict.keys()):
             cv.rectangle(new_img, (x1, y1), (x2, y2), (0, 0, 255), 2)
@@ -83,9 +90,3 @@ class Image(Init):
                     return list(self.embeddings_dict.values())[i]
             self.x_pos, self.y_pos = None, None
             Logger(msg.Errors.no_face_click, Logger.warning).log()
-
-
-if __name__ == '__main__':
-    image = cv.imread(r"C:\Users\urikh\OneDrive\pictures\Camera Roll\WIN_20200315_10_49_03_Pro.jpg")
-    image_obj = Image(image)
-    print('finish')

@@ -13,9 +13,11 @@ class KeyMap:
     remove = 'r'
     delete = 'd'
     trash = 't'
-    log_off = 'l'
+    log_off = 'o'
     exit = 'x'
     show = 's'
+    lock = 'l'
+    unlock = 'u'
     exit_cmd = 'exit'
     add_cmd = 'add'
     remove_cmd = 'remove'
@@ -23,4 +25,7 @@ class KeyMap:
     trash_cmd = 'trash'
     log_off_cmd = 'logoff'
     show_cmd = 'show'
+    lock_cmd = 'lock'
+    unlock_cmd = 'unlock'
+
 
