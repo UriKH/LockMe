@@ -1,8 +1,8 @@
 import numpy as np
 import torch
 
-from CNN.image_process import Image
-from CNN.initialize import Init
+from image_process import Image
+from initialize import Init
 from database import Database
 
 

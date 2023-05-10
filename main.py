@@ -5,7 +5,7 @@ from messages import Messages as msg
 from user_login import User
 from logger import Logger
 import ui
-from CNN.initialize import Init
+from initialize import Init
 
 
 def main():

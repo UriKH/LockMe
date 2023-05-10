@@ -7,7 +7,7 @@ import pandas as pd
 from logger import Logger
 from messages import Messages as msg
 from keys import KeyMap
-from CNN.initialize import Init
+from initialize import Init
 from database import Database
 
 commands = {KeyMap.exit_cmd: KeyMap.exit, KeyMap.add_cmd: KeyMap.add, KeyMap.remove_cmd: KeyMap.remove,

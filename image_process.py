@@ -2,7 +2,7 @@ import cv2 as cv
 import torch
 from PIL import Image as PImage
 
-from CNN.initialize import Init
+from initialize import Init
 from logger import Logger
 from messages import Messages as msg
 
