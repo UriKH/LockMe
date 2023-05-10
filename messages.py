@@ -27,6 +27,7 @@ class Messages:
         file_added = 'File added to the system'
         file_removed = 'File removed from the system'
         file_deleted = 'File deleted from the disk'
+        file_recovered = 'File recovered successfully'
         embeddings_generated = 'Face embeddings generated'
         faces_located = 'Faces located'
         loading = 'Loading and initiating the app'
@@ -35,6 +36,7 @@ class Messages:
         logging_off = 'logging-off the current user'
         single_face = 'Only one face detected, using this face by default'
         user_login = 'User logged in with ID'
+
         menu = f"""Available commands:
  > {KeyMap.add_cmd}      [{KeyMap.add}] -> add a new file to the system
  > {KeyMap.remove_cmd}   [{KeyMap.remove}] -> remove a file from the system

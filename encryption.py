@@ -2,9 +2,11 @@ import os
 import numpy as np
 from cryptography.fernet import Fernet
 import winreg
+import base64
 
 from logger import Logger
 from messages import Messages as msg
+
 
 
 class Encryption:
@@ -26,7 +28,7 @@ class Encryption:
             Logger(f'{msg.Info.file_encrypt} - path is {self.locked_path}', Logger.warning).log()
 
         os.rename(self.org_path, self.locked_path)
-        return True
+        return enc_data
 
     def decrypt_file(self):
         with open(self.locked_path, 'rb') as file:
@@ -38,6 +40,7 @@ class Encryption:
             Logger(f'{msg.Info.file_decrypt} - path is {self.org_path}', Logger.warning).log()
 
         os.rename(self.locked_path, self.org_path)
+        return raw_data
 
     @staticmethod
     def generate_key():
@@ -84,9 +87,22 @@ class Encryption:
         if len(embedding) < 512:
             Logger(msg.Errors.BUG, Logger.exception).log()
 
-        embedding = [embedding[i] + embedding[i+1] for i in range(stop=512, step=2)]
-        bin_embedding = (np.array(embedding) > 0)
+        embedding = [embedding[i] + embedding[i+1] for i in range(0, 512, 2)]
+        bin_embedding = (np.array(embedding) > 0).astype(int)
         binary_string = ''.join(str(bit) for bit in bin_embedding)
         integer = int(binary_string, 2)
-        key = integer.to_bytes(128, byteorder='big')
+        bytes_integer = integer.to_bytes(32, byteorder='big')
+        key = base64.urlsafe_b64encode(bytes_integer)
         return key
+
+    @staticmethod
+    def encrypt_data(data, embedding):
+        key = Encryption.key_from_embedding(embedding)
+        fernet = Fernet(key)
+        return fernet.encrypt(data)
+
+    @staticmethod
+    def decrypt_data(data, embedding):
+        key = Encryption.key_from_embedding(embedding)
+        fernet = Fernet(key)
+        return fernet.decrypt(data)

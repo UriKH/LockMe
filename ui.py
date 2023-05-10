@@ -43,9 +43,9 @@ def parse_n_call(cmd, line, user):
         return None
 
     if cmd == KeyMap.add_cmd:
-        add_file(*pieces, user.uid)
+        add_file(*pieces, user)
     elif cmd == KeyMap.remove_cmd:
-        remove_file(*pieces, user.uid)
+        remove_file(*pieces, user)
     elif cmd == KeyMap.exit_cmd:
         Logger(msg.Info.exiting, Logger.message).log()
         return True
@@ -68,7 +68,7 @@ def present_data(data):
     data = data.copy()
     del data['file']
     del data['user_id']
-    data['file_state'] = ['locked' if state == Database.file_state_close else 'open' for state in data['file_state']]
+    data['file_state'] = ['locked' if state == Database.file_state_locked else 'open' for state in data['file_state']]
 
     df = pd.DataFrame(data)
     pd.set_option('display.max_rows', None)
@@ -90,27 +90,27 @@ def delete_file(path):
         Logger(msg.Info.back_to_routine, Logger.info).log()
 
 
-def add_file(path, uid):
+def add_file(path, user):
     """
     Add a file to the user
     :param path: path to the file to remove
-    :param uid: the ID of the current user
+    :param user: a User object
     """
     try:
-        Init.database.add_file(path, uid)
+        Init.database.add_file(path, user)
     except Exception as e:
         Logger(e, Logger.inform).log()
         Logger(msg.Info.back_to_routine, Logger.info).log()
 
 
-def remove_file(path, uid):
+def remove_file(path, user):
     """
     Remove a file from the user's account
     :param path: path to the file to remove
     :param uid: the ID of the current user
     """
     try:
-        Init.database.remove_file(path, uid)
+        Init.database.remove_file(path, user)
     except Exception as e:
         Logger(e, Logger.inform).log()
         Logger(msg.Info.back_to_routine, Logger.info).log()
