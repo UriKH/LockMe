@@ -6,27 +6,27 @@ class Messages:
         """
         This class represents all the constant error messages
         """
-        BUG = ': BUG : sad face...'
+        BUG = 'BUG sad face...'
 
         db_no_enc_key = 'Could not retrieve/set an encryption key for dataset. Program will be terminated'
         no_cam = 'No camera available'
         file_exists = f'File does not exists in specified path'
-        no_face_click = 'face was not clicked'
+        no_face_click = 'Face was not clicked'
         invalid_cmd = 'Command is invalid'
         missing_param = 'Missing parameter'
         to_many_params = 'To many parameters for this command'
-        failed_insertion = 'failed to add the file, file already has an owner'
+        failed_insertion = 'Failed to add the file, file already has an owner'
         access_denied = 'Access denied'
-        failed_removal = 'file is not in the system'
-        unsupported_file_type = 'This is an unsupported file type'
+        failed_removal = 'File not in the system'
+        unsupported_file_type = 'Unsupported file type'
 
     class Info:
         """
         This class represents all the constant general messages to the user
         """
         hello_world = '>>> Hello there! welcome to LockMe service <<<'
-        take_pic = f'To take pic press \'{KeyMap.take_pic}\''
-        retake_pic = f'To retake press \'{KeyMap.retake_pic}\' again, else \'{KeyMap.close_cam}\''
+        take_pic = f'To take a picture press \'{KeyMap.take_pic}\' (IMPORTANT: look at the camera)'
+        retake_pic = f'To retake the image press \'{KeyMap.retake_pic}\' again, else \'{KeyMap.close_cam}\' to close'
         pic_taken = 'Picture taken'
         new_db_key = 'Congrats! new encryption key for the database was generated'
         file_encrypt = 'File encrypted'
@@ -38,7 +38,7 @@ class Messages:
         embeddings_generated = 'Face embeddings generated'
         faces_located = 'Faces located'
         loading = 'Loading and initiating the app'
-        goodbye = 'Goodbye and thank you for using LockMe'
+        goodbye = 'Goodbye and thank you for using LockMe\n'
         exiting = 'Exiting'
         logging_off = 'logging-off the current user'
         single_face = 'Only one face detected, using this face by default'
@@ -56,6 +56,7 @@ class Messages:
  > {KeyMap.lock_cmd}     [{KeyMap.lock}] -> lock a file with encryption
  > {KeyMap.unlock_cmd}   [{KeyMap.unlock}] -> unlock a file"""
         back_to_routine = 'Error ignored: Back to routine'
+        barrier = '------------------------------------------------------------------------'
 
     class Requests:
         """

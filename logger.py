@@ -41,13 +41,14 @@ class Logger:
             return result
         return wrapper
 
-    def log(self, func=None):
+    def log(self, func=None, msg_prefix='> '):
         """
         Log a message with it's logging level to the standard output
         :param func: function the logger is called from
+        :param msg_prefix: the message level prefix for printing
         """
         if self.level == Logger.message:        # message
-            print(f'>  {self.msg}', end=self.end)
+            print(f'{msg_prefix}{self.msg}', end=self.end)
             return
         elif func is None:
             if self.level == Logger.info:           # info - green

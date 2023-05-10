@@ -8,14 +8,16 @@ from initialize import Init
 
 def main():
     try:
-        Logger(msg.Info.hello_world, level=Logger.message).log()
+        Logger(msg.Info.hello_world, level=Logger.message).log(msg_prefix=' ')
 
         Init()
+        Logger('\n' + msg.Info.barrier).log(msg_prefix=' ')
         cam = Camera()
 
         while True:
             # activate and run the camera
             cam.run()
+            Logger(msg.Info.barrier + '\n').log(msg_prefix='')
             user_img = cam.get_pic()
             user = User(user_img)
 

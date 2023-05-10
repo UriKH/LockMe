@@ -92,7 +92,7 @@ def present_data(data):
     pd.set_option('display.max_rows', None)
     pd.set_option('display.max_columns', None)
 
-    Logger(df, Logger.message).log()
+    Logger(df, Logger.message).log(msg_prefix=' ')
 
 
 def delete_file(path, user):
@@ -141,7 +141,9 @@ def present_menu(user) -> bool:
     :param user: An object of User class
     :return: True if program should exit, False if log-off
     """
-    Logger(msg.Info.menu, Logger.message).log()
+    Logger('\n' + msg.Info.barrier).log(msg_prefix=' ')
+    Logger(msg.Info.menu, Logger.message).log(msg_prefix=' ')
+    Logger(msg.Info.barrier + '\n').log(msg_prefix=' ')
 
     while True:
         line = input('>>> ')
