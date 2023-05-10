@@ -8,3 +8,5 @@ Login is via face detection, thus make sure you have a camera connected to your 
 # Activation
 1. run: `pip install -r requirements.txt`
 2. run: `python main.py`
+
+~ WIP ~
