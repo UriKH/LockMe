@@ -1,4 +1,3 @@
-import keras_facenet as kfn
 from logger import Logger
 from messages import Messages as msg
 from database import Database as db

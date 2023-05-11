@@ -57,19 +57,6 @@ class Database:
         )
         self.connection.commit()
 
-    # @staticmethod
-    # def check_path(path, level):
-    #     """
-    #     Check if a file exists and log an error if not
-    #     :param path: the path to the file
-    #     :param level: logging level to pass to the logger
-    #     :return: True if the file exists else False
-    #     """
-    #     if not os.path.exists(path):
-    #         Logger(msg.Errors.file_exists, level=level).log()
-    #         return False
-    #     return True
-
     @staticmethod
     def _compress_data(data):
         """
@@ -110,6 +97,23 @@ class Database:
         """
         embedding = struct.unpack('512f', embedding_b)
         return embedding
+
+    @staticmethod
+    def _recover(path, comp_file, key, locked_path):
+        """
+        Recover a file from the database
+        :param path: path to the file
+        :param comp_file: the compressed file as it is the database
+        :param key: key to the fernet encryption
+        :param locked_path: the path to the file with the locked suffix
+        """
+        with open(path, 'wb') as fd:
+            enc_file = Database._decompress_data(comp_file).encode('utf-8')
+            recovered_data = Encryption.decrypt_data(enc_file, key)
+            fd.write(recovered_data)
+        if os.path.exists(locked_path):
+            os.remove(locked_path)
+        Logger(msg.Info.file_recovered + f' {path}', Logger.info).log()
 
     def fetch_users(self):
         """
@@ -341,23 +345,6 @@ class Database:
         except:
             Database._recover(path, db_data['file'], key, locked_path)
 
-    @staticmethod
-    def _recover(path, comp_file, key, locked_path):
-        """
-        Recover a file from the database
-        :param path: path to the file
-        :param comp_file: the compressed file as it is the database
-        :param key: key to the fernet encryption
-        :param locked_path: the path to the file with the locked suffix
-        """
-        with open(path, 'wb') as fd:
-            enc_file = Database._decompress_data(comp_file).encode('utf-8')
-            recovered_data = Encryption.decrypt_data(enc_file, key)
-            fd.write(recovered_data)
-        if os.path.exists(locked_path):
-            os.remove(locked_path)
-        Logger(msg.Info.file_recovered + f' {path}', Logger.info).log()
-
     def lock_all_files(self, uid=None):
         """
         Lock all files owned by the specified ID. If no ID is specified, lock all the system files
@@ -376,11 +363,12 @@ class Database:
             # encrypt the file
             key = self.get_user_embedding_as_key(data_dict['user_id'][i])
             file_enc = Encryption(path, key, data_dict['suffix'][i])
-            file_enc.encrypt_file()
+            enc_data = file_enc.encrypt_file()
+            comp_data = Database._compress_data(enc_data)
 
-            # change the file state in the database
-            self.cursor.execute("UPDATE files SET file_state = ? WHERE file_path = ?",
-                                (Database.file_state_locked, path))
+            # change the file state in the database and update to latest changes
+            self.cursor.execute("UPDATE files SET file_state = ? file = ? WHERE file_path = ?",
+                                (Database.file_state_locked, comp_data, path))
             self.connection.commit()
 
     def unlock_all_files(self, uid=None):
@@ -428,6 +416,11 @@ class Database:
                 return False
 
     def recover_file(self, path, user):
+        """
+        Recover a file from latest saved version
+        :param path: path to the file as it is saved in the system
+        :param user: a User object
+        """
         # check if action is valid on the file
         valid, db_data = self.__validate_action_on_file(path, user)
         if not valid:

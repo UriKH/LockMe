@@ -8,7 +8,6 @@ from messages import Messages as msg
 
 
 class Image(Init):
-    buffer = 10
     conf_thresh = 0.95
 
     def __init__(self, image):
@@ -72,7 +71,7 @@ class Image(Init):
 
         cv.setMouseCallback(Camera.window_name, mouse_callback)
 
-        # draw a number box on the face
+        # draw an index box of the face
         new_img = self.image
         for i, (x1, y1, x2, y2) in enumerate(self.embeddings_dict.keys()):
             cv.rectangle(new_img, (x1, y1), (x2, y2), (0, 0, 255), 2)

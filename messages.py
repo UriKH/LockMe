@@ -49,12 +49,13 @@ class Messages:
  > {KeyMap.add_cmd}      [{KeyMap.add}] -> add a new file to the system
  > {KeyMap.remove_cmd}   [{KeyMap.remove}] -> remove a file from the system
  > {KeyMap.trash_cmd}    [{KeyMap.trash}] -> delete a file from disk
- > {KeyMap.delete_cmd}   [{KeyMap.delete}] -> delete the user account and unlock all of its files
- > {KeyMap.log_off_cmd}   [{KeyMap.log_off}] -> log off the system
- > {KeyMap.exit_cmd}     [{KeyMap.exit}] -> exit the program
  > {KeyMap.show_cmd}     [{KeyMap.show}] -> list all files of the user and their status
  > {KeyMap.lock_cmd}     [{KeyMap.lock}] -> lock a file with encryption
- > {KeyMap.unlock_cmd}   [{KeyMap.unlock}] -> unlock a file"""
+ > {KeyMap.unlock_cmd}   [{KeyMap.unlock}] -> unlock a file
+ > {KeyMap.recover_cmd}      -> recover a file
+ > {KeyMap.delete_cmd}   [{KeyMap.delete}] -> delete the user account and unlock all of its files
+ > {KeyMap.log_off_cmd}   [{KeyMap.log_off}] -> log off the system
+ > {KeyMap.exit_cmd}     [{KeyMap.exit}] -> exit the program"""
         back_to_routine = 'Error ignored: Back to routine'
         barrier = '------------------------------------------------------------------------'
 

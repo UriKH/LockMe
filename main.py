@@ -25,18 +25,13 @@ def main():
                 Logger('Access Granted', Logger.info).log()
                 Logger(msg.Info.user_login + f' {user.uid}', msg.Info).log()
 
-                if ui.present_menu(user):
-                    Logger(msg.Info.goodbye, Logger.message).log()
-                    exit(0)
+                ui.present_menu(user)
             else:
                 join = ui.continue_to_system()
                 if join:
                     user.uid = Init.database.create_new_user(user.embedding)
                     Logger(msg.Info.user_login + f' {user.uid}', msg.Info).log()
-
-                    if ui.present_menu(user):
-                        Logger(msg.Info.goodbye, Logger.message).log()
-                        exit(0)
+                    ui.present_menu(user)
                 else:
                     Logger(msg.Info.goodbye, Logger.message).log()
                     exit(0)

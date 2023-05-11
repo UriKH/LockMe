@@ -135,7 +135,7 @@ def remove_file(path, user):
         Logger(msg.Info.back_to_routine, Logger.info).log()
 
 
-def present_menu(user) -> bool:
+def present_menu(user):
     """
     Present a menu of options to the user and execute the user's requests
     :param user: An object of User class
@@ -161,9 +161,10 @@ def present_menu(user) -> bool:
         if fully_exit is None:
             continue
         if fully_exit:
-            return True
+            Logger(msg.Info.goodbye, Logger.message).log()
+            exit(0)
         else:
-            return False
+            return
 
 
 def continue_to_system() -> bool:
