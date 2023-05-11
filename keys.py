@@ -26,5 +26,8 @@ class KeyMap:
     log_off_cmd = 'logoff'
     show_cmd = 'show'
     lock_cmd = 'lock'
+    lock_all_cmd = 'lock_all'
     unlock_cmd = 'unlock'
+    unlock_all_cmd = 'unlock_all'
     recover_cmd = 'recover'
+

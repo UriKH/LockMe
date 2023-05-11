@@ -17,7 +17,7 @@ class Encryption:
         self.locked_path = '.'.join([clean_path, 'locked'])
         self.org_path = '.'.join([clean_path, suffix])
 
-    def encrypt_file(self):
+    def encrypt_file(self, log=True):
         """
         Encrypt the file
         :return: the encrypted file contents
@@ -28,12 +28,13 @@ class Encryption:
 
         with open(self.org_path, 'wb') as f:
             f.write(enc_data)
-            Logger(f'{msg.Info.file_encrypt} - path is {self.locked_path}', Logger.warning).log()
+            if log:
+                Logger(f'{msg.Info.file_encrypt} - path is {self.locked_path}', Logger.warning).log()
 
         os.rename(self.org_path, self.locked_path)
         return enc_data
 
-    def decrypt_file(self):
+    def decrypt_file(self, log=True):
         """
         Decrypt the file
         :return: the decrypted contents
@@ -44,7 +45,8 @@ class Encryption:
 
         with open(self.locked_path, 'wb') as f:
             f.write(raw_data)
-            Logger(f'{msg.Info.file_decrypt} - path is {self.org_path}', Logger.warning).log()
+            if log:
+                Logger(f'{msg.Info.file_decrypt} - path is {self.org_path}', Logger.warning).log()
 
         os.rename(self.locked_path, self.org_path)
         return raw_data
