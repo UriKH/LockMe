@@ -13,6 +13,8 @@ class Init:
 
     @Logger(msg.Info.loading, level=Logger.info).time_it
     def __init__(self):
+        if not(Init.database is None or Init.resnet is None or Init.mtcnn is None or Init.device is None):
+            return
         Init.database = db()
 
         Init.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')

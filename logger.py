@@ -36,8 +36,7 @@ class Logger:
             start = time.time()
             result = func(*args, **kwarg)
             end = time.time()
-            self.msg += f' - in {(end - start):.3f} seconds'
-            self.log()
+            Logger(self.msg + f' - in {(end - start):.3f} seconds', self.level).log()
             return result
         return wrapper
 
