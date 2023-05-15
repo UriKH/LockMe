@@ -70,7 +70,7 @@ def main():
     net.load_state_dict(state_dict)     # load the state dictionary into the model
 
     loss = ContrastiveLoss().to(device)
-    optimizer = optim.Adam(net.parameters(), lr=0.0005)  # 0 - 70 (0.0005) # 70 - 100 (0.001) # 100 - 120 (0.0005)
+    optimizer = optim.Adam(net.parameters(), lr=0.00025)  # 0 - 70 (0.0005) # 70 - 100 (0.001) # 100 - 120 (0.0005)
     # summary(Model(), input_size=[(1, 100, 100), (1, 100, 100)])
 
     training(net, loader, optimizer, loss, epochs=50)
