@@ -134,7 +134,7 @@ def run():
         layers.Lambda(lambda x: tf.math.l2_normalize(x, axis=1))
     ])
 
-    # Compile the model
+    # Compile the model_torch
     model.compile(
         optimizer=tf.keras.optimizers.Adam(0.001),
         loss=tfa.losses.TripletSemiHardLoss(), metrics=['accuracy'])
@@ -142,7 +142,7 @@ def run():
     # Train the network
     history = model.fit(train_dataset, epochs=5)
 
-    # test_loss, test_accuracy = model.evaluate(test_dataset)
+    # test_loss, test_accuracy = model_torch.evaluate(test_dataset)
     # print("Test accuracy:", test_accuracy)
 
 

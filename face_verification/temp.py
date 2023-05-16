@@ -40,7 +40,7 @@ model = tf.keras.Sequential([
     layers.Lambda(lambda x: tf.math.l2_normalize(x, axis=1))
 ])
 
-# Compile the model
+# Compile the model_torch
 model.compile(
     optimizer=tf.keras.optimizers.Adam(0.001),
     loss=tfa.losses.TripletSemiHardLoss(), metrics=['accuracy'])

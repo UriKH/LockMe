@@ -75,8 +75,8 @@ class Image(Init):
         new_img = self.image
         for i, (x1, y1, x2, y2) in enumerate(self.embeddings_dict.keys()):
             cv.rectangle(new_img, (x1, y1), (x2, y2), (0, 0, 255), 2)
-            cv.rectangle(new_img, (x1 - 1, y2), (x2 + 1, y2 + 35), (0, 0, 255), cv.FILLED)
-            cv.putText(new_img, str(i + 1), (x1 + 7, y2 + 30), cv.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+            cv.rectangle(new_img, (x1 - 1, y2 - 35), (x2 + 1, y2), (0, 0, 255), cv.FILLED)
+            cv.putText(new_img, str(i + 1), (x1 + 7, y2 - 5), cv.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
 
         Logger(msg.Requests.face_index, Logger.message).log()
         while True:
