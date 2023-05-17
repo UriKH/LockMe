@@ -28,8 +28,19 @@ class Image(Init):
         """
         boxes, conf = Init.mtcnn.detect(self.image)
         boxes = boxes.astype(int)
-        boxes = [box for i, box in enumerate(boxes) if conf[i] >= Image.conf_thresh]
-        return boxes
+        new_boxes = []
+        for i, box in enumerate(boxes):
+            if conf[i] < Image.conf_thresh:
+                continue
+            x1, y1, x2, y2 = box
+            h, w, _ = self.image.shape
+            x1 = max(0, x1)
+            y1 = max(0, y1)
+            x2 = min(w, x2)
+            y2 = min(h, y2)
+            box = x1, y1, x2, y2
+            new_boxes.append(box)
+        return new_boxes
 
     @Logger(msg.Info.embeddings_generated, Logger.info).time_it
     def create_embeddings(self):
