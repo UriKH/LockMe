@@ -1,8 +1,9 @@
 keras_facenet
 facenet_pytorch
-torchvision
-tensorflow
 torch
+torchvision
+torchsummary
+tensorflow
 numpy
 opencv-python
 pandas

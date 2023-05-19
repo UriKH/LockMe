@@ -6,7 +6,7 @@ from database import Database
 
 
 class User:
-    dist_thresh = 0.7
+    dist_thresh = 0.5
 
     def __init__(self, user_img):
         self.img_data = Image(user_img)

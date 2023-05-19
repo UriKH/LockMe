@@ -47,7 +47,7 @@ class Logger:
         :param msg_prefix: the message level prefix for printing
         """
         if self.level == Logger.message:        # message
-            print(f'{msg_prefix}{self.msg}', end=self.end)
+            print(f'{Logger.Colors.white}{msg_prefix}{self.msg}', end=self.end)
             return
         elif func is None:
             if self.level == Logger.info:           # info - green

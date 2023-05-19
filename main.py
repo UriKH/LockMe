@@ -33,7 +33,7 @@ def main():
                     Logger(msg.Info.user_login + f' {user.uid}', msg.Info).log()
                     ui.present_menu(user)
                 else:
-                    Logger(msg.Info.goodbye, Logger.message).log()
+                    # Logger(msg.Info.goodbye, Logger.message).log()
                     exit(0)
     except Exception as e:
         Logger(e, level=Logger.inform).log(main)

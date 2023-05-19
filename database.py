@@ -3,6 +3,7 @@ import os
 import bz2 as bz
 import struct
 import cv2 as cv
+from tqdm import tqdm
 
 from encryption import Encryption
 from logger import Logger
@@ -351,7 +352,12 @@ class Database:
         :param uid: user ID
         """
         data_dict = self.fetch_user_data()
-        for i, path in enumerate(data_dict['file_path']):
+        if len(data_dict['file_path']) == 0:    # prevent from running tqdm
+            return
+
+        for i, path in zip(
+                tqdm(range(len(data_dict['file_path'])), desc=msg.Load.locking_files),
+                data_dict['file_path']):
             # file is already locked
             if data_dict['file_state'][i] == Database.file_state_locked:
                 continue
@@ -363,11 +369,11 @@ class Database:
             # encrypt the file
             key = self.get_user_embedding_as_key(data_dict['user_id'][i])
             file_enc = Encryption(path, key, data_dict['suffix'][i])
-            enc_data = file_enc.encrypt_file()
+            enc_data = file_enc.encrypt_file(log=False)
             comp_data = Database._compress_data(enc_data)
 
             # change the file state in the database and update to latest changes
-            self.cursor.execute("UPDATE files SET file_state = ? file = ? WHERE file_path = ?",
+            self.cursor.execute("UPDATE files SET file_state = ?, file = ? WHERE file_path = ?",
                                 (Database.file_state_locked, comp_data, path))
             self.connection.commit()
 
@@ -377,7 +383,12 @@ class Database:
         :param uid: user ID
         """
         data_dict = self.fetch_user_data()
-        for i, path in enumerate(data_dict['file_path']):
+        if len(data_dict['file_path']) == 0:    # prevent from running tqdm
+            return
+
+        for i, path in zip(
+                tqdm(range(len(data_dict['file_path'])), desc=msg.Load.unlocking_files),
+                data_dict['file_path']):
             # file is already locked
             if data_dict['file_state'][i] == Database.file_state_open:
                 continue
@@ -389,7 +400,7 @@ class Database:
             # encrypt the file
             key = self.get_user_embedding_as_key(data_dict['user_id'][i])
             file_enc = Encryption(path, key, data_dict['suffix'][i])
-            file_enc.decrypt_file()
+            file_enc.decrypt_file(log=False)
 
             # change the file state in the database
             self.cursor.execute("UPDATE files SET file_state = ? WHERE file_path = ?",

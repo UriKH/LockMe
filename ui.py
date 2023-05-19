@@ -13,11 +13,12 @@ from database import Database
 commands = {KeyMap.exit_cmd: KeyMap.exit, KeyMap.add_cmd: KeyMap.add, KeyMap.remove_cmd: KeyMap.remove,
             KeyMap.delete_cmd: KeyMap.delete, KeyMap.trash_cmd: KeyMap.trash,
             KeyMap.log_off_cmd: KeyMap.log_off, KeyMap.show_cmd: KeyMap.show, KeyMap.lock_cmd: KeyMap.lock,
-            KeyMap.unlock_cmd: KeyMap.unlock, KeyMap.recover_cmd: KeyMap.recover_cmd}
+            KeyMap.unlock_cmd: KeyMap.unlock, KeyMap.recover_cmd: KeyMap.recover_cmd,
+            KeyMap.lock_all_cmd: KeyMap.lock_all_cmd, KeyMap.unlock_all_cmd: KeyMap.unlock_all_cmd}
 
 cmd_param = {KeyMap.add_cmd: 1, KeyMap.remove_cmd: 1, KeyMap.delete_cmd: 0, KeyMap.trash_cmd: 1,
              KeyMap.log_off_cmd: 0, KeyMap.show_cmd: 0, KeyMap.exit_cmd: 0, KeyMap.lock_cmd: 1, KeyMap.unlock_cmd: 1,
-             KeyMap.recover_cmd: 1}
+             KeyMap.recover_cmd: 1, KeyMap.unlock_all_cmd: 0, KeyMap.lock_all_cmd: 0}
 
 
 def parse_n_call(cmd, line, user):
@@ -55,7 +56,6 @@ def parse_n_call(cmd, line, user):
             Init.database.unlock_file(*pieces, user)
         elif cmd == KeyMap.exit_cmd:
             Logger(msg.Info.exiting, Logger.message).log()
-            Init.database.lock_all_files()
             return True
         elif cmd == KeyMap.log_off_cmd:
             Logger(msg.Info.logging_off, Logger.message).log()
@@ -72,6 +72,10 @@ def parse_n_call(cmd, line, user):
             return False
         elif cmd == KeyMap.recover_cmd:
             Init.database.recover_file(*pieces, user)
+        elif cmd == KeyMap.unlock_all_cmd:
+            Init.database.unlock_all_files(user.uid)
+        elif cmd == KeyMap.lock_all_cmd:
+            Init.database.lock_all_files(user.uid)
         return None
     except Exception as e:
         Logger(e, Logger.inform).log()
@@ -161,7 +165,7 @@ def present_menu(user):
         if fully_exit is None:
             continue
         if fully_exit:
-            Logger(msg.Info.goodbye, Logger.message).log()
+            # Logger(msg.Info.goodbye, Logger.message).log()
             exit(0)
         else:
             return

@@ -1,4 +1,5 @@
 from keys import KeyMap
+from logger import Logger
 
 
 class Messages:
@@ -51,6 +52,8 @@ class Messages:
  > {KeyMap.trash_cmd}    [{KeyMap.trash}] -> delete a file from disk
  > {KeyMap.show_cmd}     [{KeyMap.show}] -> list all files of the user and their status
  > {KeyMap.lock_cmd}     [{KeyMap.lock}] -> lock a file with encryption
+ > {KeyMap.lock_all_cmd}     -> lock all files
+ > {KeyMap.unlock_all_cmd}   -> unlock all files
  > {KeyMap.unlock_cmd}   [{KeyMap.unlock}] -> unlock a file
  > {KeyMap.recover_cmd}      -> recover a file
  > {KeyMap.delete_cmd}   [{KeyMap.delete}] -> delete the user account and unlock all of its files
@@ -66,3 +69,7 @@ class Messages:
         want_to_join = 'Hi there! you are not recognized by the system, would you like to join the system? [Y/n]'
         face_index = 'Please click on the user\'s face'
         delete_user = 'Are you sure you want to delete all user data? [y/N]'
+
+    class Load:
+        unlocking_files = f'{Logger.Colors.yellow}Unlock files'
+        locking_files = f'{Logger.Colors.yellow}Lock files '
