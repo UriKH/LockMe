@@ -1,19 +1,21 @@
-from logger import Logger
 from messages import Messages as msg
 from database import Database as db
-from facenet_pytorch import MTCNN, InceptionResnetV1
+from facenet_pytorch import MTCNN
 import torch
+
+import model.model as model
+from logger import Logger
 
 
 class Init:
     database = None
-    resnet = None
+    net = None
     mtcnn = None
     device = None
 
     @Logger(msg.Info.loading, level=Logger.info).time_it
     def __init__(self):
-        if not(Init.database is None or Init.resnet is None or Init.mtcnn is None or Init.device is None):
+        if not(Init.database is None or Init.net is None or Init.mtcnn is None or Init.device is None):
             return
         Init.database = db()
 
@@ -23,4 +25,7 @@ class Init:
             thresholds=[0.6, 0.7, 0.7], factor=0.709, post_process=True,
             device=Init.device
         )
-        Init.resnet = InceptionResnetV1(pretrained='vggface2').eval().to(Init.device)
+        Init.net = model.ClassicModel()
+        # model.ClassicModel.get_training_accuracy()
+        state_dict = torch.load(model.config.MODEL_PATH)
+        Init.net.load_state_dict(state_dict)

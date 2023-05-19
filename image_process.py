@@ -1,17 +1,18 @@
 import cv2 as cv
-import torch
-from PIL import Image as PImage
+import numpy as np
 
 from initialize import Init
 from logger import Logger
 from messages import Messages as msg
+from model.dataset import ModelDataset
+import model.config as config
 
 
 class Image(Init):
-    conf_thresh = 0.95
+    conf_thresh = 0.9
 
     def __init__(self, image):
-        if Init.mtcnn is None or Init.resnet is None or Init.device is None:
+        if Init.mtcnn is None or Init.net is None or Init.device is None:
             super().__init__()
         self.image = cv.cvtColor(image, cv.COLOR_BGR2RGB)
         self.embeddings_dict = {}
@@ -45,24 +46,14 @@ class Image(Init):
     @Logger(msg.Info.embeddings_generated, Logger.info).time_it
     def create_embeddings(self):
         """
-        Create an embedding of the detected face
+        Create embeddings of the detected faces
         """
-        faces = []
         for box in self.__get_coords():
-            x1, y1, x2, y2 = box
-            temp_img = PImage.fromarray(self.image[y1: y2, x1: x2])
-            x_aligned = Init.mtcnn(temp_img)
-            if x_aligned is None:
-                continue
-            faces.append(x_aligned)
-            self.embeddings_dict[tuple(box)] = None
-        if len(self.embeddings_dict.keys()) == 0:
-            return
-
-        aligned = torch.stack(faces).to(Init.device)
-        embeddings = Init.resnet(aligned).detach().cpu()
-        for box, embedding in zip(self.embeddings_dict.keys(), embeddings):
-            self.embeddings_dict[box] = embedding
+            x_aligned = ModelDataset.create_image(self.image, box)
+            x_aligned = cv.cvtColor(x_aligned, cv.COLOR_GRAY2BGR)
+            processed = Init.net.preprocess_image(x_aligned)
+            embedding = Init.net.forward_once(processed.unsqueeze(0).to(Init.device))
+            self.embeddings_dict[tuple(box)] = np.squeeze(embedding.detach().numpy())
 
     def choose_face(self):
         """
