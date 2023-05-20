@@ -12,6 +12,6 @@ To use the system run in terminal:
 2. and then: `python main.py`
 
 ## running example
-![img.png](images/img.png)
+![img.png](images/terminal_view.png)
 
 # ~ WIP ~
