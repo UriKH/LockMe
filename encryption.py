@@ -101,7 +101,7 @@ class Encryption:
             Logger(msg.Errors.BUG, Logger.exception).log()
 
         embedding = [embedding[i] + embedding[i+1] for i in range(0, 512, 2)]
-        bin_embedding = (np.array(embedding) > 0).astype(int)
+        bin_embedding = (np.array(embedding) > 0.5).astype(int)
         binary_string = ''.join(str(bit) for bit in bin_embedding)
         integer = int(binary_string, 2)
         bytes_integer = integer.to_bytes(32, byteorder='big')

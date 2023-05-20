@@ -154,6 +154,8 @@ def present_menu(user):
         line = line.rstrip()
         line = line.lstrip()
         command = line.split(' ')[0]
+        if len(command) == 0:
+            continue
         if command.lower() not in commands.keys() and command.lower() not in commands.values():
             Logger(msg.Errors.invalid_cmd, Logger.warning).log()
             continue

@@ -99,8 +99,7 @@ class Database:
         embedding = struct.unpack('512f', embedding_b)
         return embedding
 
-    @staticmethod
-    def _recover(path, comp_file, key, locked_path):
+    def _recover(self, path, comp_file, key, locked_path):
         """
         Recover a file from the database
         :param path: path to the file
@@ -114,6 +113,9 @@ class Database:
             fd.write(recovered_data)
         if os.path.exists(locked_path):
             os.remove(locked_path)
+        self.cursor.execute("UPDATE files SET file_state = ? WHERE file_path = ?",
+                            (Database.file_state_open, path))
+        self.connection.commit()
         Logger(msg.Info.file_recovered + f' {path}', Logger.info).log()
 
     def fetch_users(self):
@@ -232,6 +234,11 @@ class Database:
             suffix = path.split('.')[-1]
         else:
             suffix = 'no suffix'
+
+        if not os.path.isfile(path):
+            Logger(msg.Errors.not_a_file, Logger.warning).log()
+            return False
+
         with open(path, 'rb') as fd:
             data = fd.read()
 
@@ -302,7 +309,7 @@ class Database:
             self.connection.commit()
             return True
         except:
-            Database._recover(path, db_data['file'], key, locked_path)
+            self._recover(path, db_data['file'], key, locked_path)
 
     def unlock_file(self, path, user):
         """
@@ -344,7 +351,7 @@ class Database:
                 locked_path = file_enc.locked_path
                 file_enc.decrypt_file()
         except:
-            Database._recover(path, db_data['file'], key, locked_path)
+            self._recover(path, db_data['file'], key, locked_path)
 
     def lock_all_files(self, uid=None):
         """
@@ -439,4 +446,4 @@ class Database:
 
         key = self.get_user_embedding_as_key(user.uid)
         file_enc = Encryption(path, key, db_data['suffix'])
-        Database._recover(path, db_data['file'], key, file_enc.locked_path)
+        self._recover(path, db_data['file'], key, file_enc.locked_path)
