@@ -18,7 +18,7 @@ To use the system run in terminal:
 * I used a classic SNN architecture with 3 convolution blocks and also added batch normalization and dropout.
 The network is trained using a cross entropy loss.
 I tried also triplet loss and contrastive loss but BCE gave me the best results with the amount of data that I had.
-* The model is trained for 50 epochs and learning rate of 0.0006 using batch size 128 
+* The model is trained for 50 epochs and learning rate of 0.0006 using batch size 128. While training I used learning rates between 0.0001 to 0.0006.
 * The **dataset** is a combination of samples I transformed from AT&T, LFW and my own. 
 
 Here below is the loss of the model after 50 epochs:
