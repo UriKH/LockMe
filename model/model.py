@@ -124,14 +124,20 @@ class ClassicModel(nn.Module):
                     positives.append(dist)
                 else:
                     negatives.append(dist)
+        above_mean = np.sum(np.mean(torch.cat(positives).detach().numpy()) < torch.cat(positives).detach().numpy())
+        bellow_mean = np.sum(np.mean(torch.cat(positives).detach().numpy()) > torch.cat(positives).detach().numpy())
         print(f'train set accuracy: {true / samples}')
         print(f'positives:')
         print(f'mean: {np.mean(torch.cat(positives).detach().numpy()):.3f}\t'
+              f'above: {above_mean:.3f}, bellow: {bellow_mean:.3f}\n'
               f'median: {np.median(torch.cat(positives).detach().numpy()):.3f}\t'
               f'minimum {np.min(torch.cat(positives).detach().numpy()):.3f}\t'
               f'maximum: {np.max(torch.cat(positives).detach().numpy()):.3f}\n')
+        above_mean = np.sum(np.mean(torch.cat(negatives).detach().numpy()) < torch.cat(negatives).detach().numpy())
+        bellow_mean = np.sum(np.mean(torch.cat(negatives).detach().numpy()) > torch.cat(negatives).detach().numpy())
         print(f'negatives:')
         print(f'mean: {np.mean(torch.cat(negatives).detach().numpy()):.3f}\t'
+              f'above: {above_mean:.3f}, bellow: {bellow_mean:.3f}\n'
               f'median: {np.median(torch.cat(negatives).detach().numpy()):.3f}\t'
               f'minimum {np.min(torch.cat(negatives).detach().numpy()):.3f}\t'
               f'maximum: {np.max(torch.cat(negatives).detach().numpy()):.3f}')

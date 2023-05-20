@@ -4,6 +4,7 @@ from facenet_pytorch import MTCNN
 import torch
 
 import model.model as model
+from model.train import try_it
 from logger import Logger
 
 
@@ -27,5 +28,6 @@ class Init:
         )
         Init.net = model.ClassicModel()
         # model.ClassicModel.get_training_accuracy()
+        # try_it()
         state_dict = torch.load(model.config.MODEL_PATH)
         Init.net.load_state_dict(state_dict)
