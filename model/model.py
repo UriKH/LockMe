@@ -12,7 +12,7 @@ from PIL import Image
 import cv2 as cv
 import numpy as np
 
-from dataset import ModelDataset
+from model.dataset import ModelDataset
 import model.config as config
 
 

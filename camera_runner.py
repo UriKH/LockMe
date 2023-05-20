@@ -45,7 +45,7 @@ class Camera:
                     if key == ord(KeyMap.close_cam):    # close the camera
                         Logger(msg.Info.pic_taken, level=Logger.message).log()
                         return
-                    elif key == ord(KeyMap.take_pic):   # retake picture
+                    elif key == ord(KeyMap.retake_pic):   # retake picture
                         Logger(msg.Info.take_pic, level=Logger.message).log()
                         break
 

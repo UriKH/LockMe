@@ -14,6 +14,10 @@ import model.config as config
 
 
 def train(model, loader: DataLoader, optimizer: optim, criterion, epochs=10, ckpt=10):
+    """
+    Train the model
+    TODO: Rewrite with validation testing, accuracy testing and graphs
+    """
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     cntr = []
     loss_hist = []
