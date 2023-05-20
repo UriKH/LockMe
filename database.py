@@ -351,7 +351,7 @@ class Database:
         Lock all files owned by the specified ID. If no ID is specified, lock all the system files
         :param uid: user ID
         """
-        data_dict = self.fetch_user_data()
+        data_dict = self.fetch_user_data(uid)
         if len(data_dict['file_path']) == 0:    # prevent from running tqdm
             return
 
@@ -382,7 +382,7 @@ class Database:
         Unlock all files owned by the specified ID. If no ID is specified, unlock all the system files
         :param uid: user ID
         """
-        data_dict = self.fetch_user_data()
+        data_dict = self.fetch_user_data(uid)
         if len(data_dict['file_path']) == 0:    # prevent from running tqdm
             return
 
