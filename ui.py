@@ -180,8 +180,11 @@ def continue_to_system() -> bool:
     """
     Logger(msg.Requests.want_to_join, level=Logger.message).log()
     while True:
-        key = cv.waitKey()
-        if key == ord(KeyMap.yes):
+        ans = input('>>> ')
+        if not ans.isalpha():
+            continue
+        ans = ans.lower()
+        if ans == KeyMap.yes:
             return True
-        elif key == ord(KeyMap.no):
+        elif ans == KeyMap.no:
             return False

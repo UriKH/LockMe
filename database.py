@@ -383,6 +383,7 @@ class Database:
             self.cursor.execute("UPDATE files SET file_state = ?, file = ? WHERE file_path = ?",
                                 (Database.file_state_locked, comp_data, path))
             self.connection.commit()
+        print()     # this is a bug fix of tqdm covering the input line
 
     def unlock_all_files(self, uid=None):
         """
@@ -413,6 +414,7 @@ class Database:
             self.cursor.execute("UPDATE files SET file_state = ? WHERE file_path = ?",
                                 (Database.file_state_open, path))
             self.connection.commit()
+        print()  # this is a bug fix of tqdm covering the input line
 
     def delete_user(self, uid):
         """
@@ -422,15 +424,18 @@ class Database:
         """
         Logger(msg.Requests.delete_user, level=Logger.message).log()
         while True:
-            key = cv.waitKey()
-            if key == ord(KeyMap.yes):
+            ans = input('>>> ')
+            if not ans.isalpha():
+                continue
+            ans = ans.lower()
+            if ans == KeyMap.yes:
                 self.unlock_all_files(uid)
                 self.cursor.execute("DELETE FROM files WHERE uid = ?", (uid,))
                 self.cursor.execute("DELETE FROM users WHERE uid = ?", (uid,))
                 self.connection.commit()
                 Logger(msg.Info.user_deleted + f' - ID: {uid}', Logger.warning).log()
                 return True
-            elif key == ord(KeyMap.no):
+            elif ans == KeyMap.no:
                 return False
 
     def recover_file(self, path, user):
