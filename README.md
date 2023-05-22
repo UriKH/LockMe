@@ -22,7 +22,8 @@ To activate the system follow these steps:
 * I tried a few models and loss functions such as triplet loss and contrastive loss with different learning rates 
 but BCE gave me the best results with the amount of data that I had.
 * The model is trained for 50 epochs and learning rate of 0.0006 using batch size 128.
-* The **dataset** is a combination of samples I transformed from AT&T, LFW and my own. 
+* The **dataset** is a combination of samples I transformed from AT&T, LFW and my own.
+To recreate a similar dataset use the functions in the **model/dataset.py** file.
 
 Here below is the loss and accuracy of the model after 50 epochs:
 
