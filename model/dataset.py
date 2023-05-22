@@ -8,9 +8,12 @@ from PIL import Image
 import cv2 as cv
 
 import torch
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, DataLoader, random_split
 import torchvision.datasets as datasets
 from facenet_pytorch import MTCNN
+
+import model.config as config
+import model.model_utils as utils
 
 
 class ModelDataset(Dataset):
@@ -18,10 +21,11 @@ class ModelDataset(Dataset):
     The dataset class for the model
     """
 
-    def __init__(self, ds_path, transform=None):
-        self.ds_path = ds_path
-        self.dataset = datasets.ImageFolder(root=ds_path)
+    def __init__(self, root, transform=None, train_ratio=0.8):
+        self.ds_path = root
+        self.dataset = datasets.ImageFolder(root=root)
         self.transform = transform
+        self.train_ratio = train_ratio
 
     def __getitem__(self, index):
         """
@@ -56,6 +60,19 @@ class ModelDataset(Dataset):
 
     def __len__(self):
         return len(self.dataset.imgs)
+
+    def split_dataset(self):
+        # Compute the number of samples for train/validation split
+        num_samples = len(self.dataset)
+        num_train = int(self.train_ratio * num_samples)
+        num_valid = num_samples - num_train
+
+        # Perform the train/validation split
+        train_dataset, valid_dataset = random_split(self, [num_train, num_valid])
+        train_loader = DataLoader(train_dataset, batch_size=config.BATCH_SIZE, shuffle=True, num_workers=utils.get_workers())
+        valid_loader = DataLoader(valid_dataset, batch_size=config.BATCH_SIZE, shuffle=False, num_workers=utils.get_workers())
+        return train_loader, valid_loader
+
 
     @staticmethod
     def create_image(image, box):
@@ -95,7 +112,7 @@ class ModelDataset(Dataset):
         return canvas
 
     @staticmethod
-    def create_samples_from_folders(parent=r'C:\LockMe_DATA\temp'):
+    def create_samples_from_folders(parent=r'C:\LockMe_DATA\temp', start=0):
         """
         Create a basic dataset from folders of images in form of the AT&T dataset
         :param parent: the parent directory of all subjects
@@ -109,7 +126,7 @@ class ModelDataset(Dataset):
 
         people = os.listdir(parent)
         for i, p in enumerate(people):
-            new_dir = os.path.join(parent, f's{i + 1}')
+            new_dir = os.path.join(parent, f's{i + 1 + start}')
             os.makedirs(new_dir)
             for j, file in enumerate(os.listdir(os.path.join(parent, p))):
                 image = cv.imread(os.path.join(parent, p, file))

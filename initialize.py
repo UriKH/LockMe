@@ -1,10 +1,12 @@
+import os
+
 from messages import Messages as msg
 from database import Database as db
 from facenet_pytorch import MTCNN
 import torch
 
-import model.model as model
-from model.train import try_it
+from model.SNN import Net
+from model import config
 from logger import Logger
 
 
@@ -26,8 +28,6 @@ class Init:
             thresholds=[0.6, 0.7, 0.7], factor=0.709, post_process=True,
             device=Init.device
         )
-        Init.net = model.ClassicModel()
-        # model.ClassicModel.get_training_accuracy()
-        # try_it()
-        state_dict = torch.load(model.config.MODEL_PATH)
+        Init.net = Net()
+        state_dict = torch.load(os.path.join(os.getcwd(), 'model', config.MODEL_NAME))
         Init.net.load_state_dict(state_dict)

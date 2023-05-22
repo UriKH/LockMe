@@ -6,6 +6,7 @@ import base64
 
 from logger import Logger
 from messages import Messages as msg
+from model.SNN import Net
 
 
 class Encryption:
@@ -93,14 +94,19 @@ class Encryption:
     @staticmethod
     def key_from_embedding(embedding):
         """
-        Generate a 128 bits key from 512 float vector
-        :param embedding: A 512 float vector representing an image
+        Generate a 128 bits key from float vector
+        :param embedding: A float vector representing an image
         :return: The key generated from the vector
         """
-        if len(embedding) < 512:
+        if len(embedding) < Net.embedding_size:
             Logger(msg.Errors.BUG, Logger.exception).log()
 
-        embedding = [embedding[i] + embedding[i+1] for i in range(0, 512, 2)]
+        step = int(Net.embedding_size / 128)
+        for i in range(128):
+            embedding[i] = np.sum(np.array(embedding[i * step: i * step + step]))
+        embedding = embedding[: 128]
+
+        # embedding = [embedding[i] + embedding[i+1] for i in range(0, 4096, 32)]
         bin_embedding = (np.array(embedding) > 0.5).astype(int)
         binary_string = ''.join(str(bit) for bit in bin_embedding)
         integer = int(binary_string, 2)
