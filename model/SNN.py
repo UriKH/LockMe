@@ -60,11 +60,10 @@ class Net(nn.Module):
         self.sigmoid = nn.Sigmoid()
 
     def _get_conv_output_size(self):
-        with torch.no_grad():
-            x = self.conv_block1(torch.zeros(1, 1, config.INPUT_SIZE[0], config.INPUT_SIZE[1]))
-            x = self.conv_block2(x)
-            x = self.conv_block3(x)
-            x = self.conv_block4(x)
+        x = self.conv_block1(torch.zeros(1, 1, config.INPUT_SIZE[0], config.INPUT_SIZE[1]))
+        x = self.conv_block2(x)
+        x = self.conv_block3(x)
+        x = self.conv_block4(x)
         return x.view(x.size(0), -1).size(1)
 
     def forward_once(self, x):
