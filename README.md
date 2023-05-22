@@ -16,9 +16,9 @@ To use the system run in terminal:
 
 # The Model
 * I used the classic SNN architecture using binary cross entropy loss.
-* I tried a few models and loss functions such as triplet loss anc contrastive loss 
+* I tried a few models and loss functions such as triplet loss and contrastive loss with different learning rates 
 but BCE gave me the best results with the amount of data that I had.
-* The model is trained for 50 epochs and learning rate of 0.0006 using batch size 128. While training I used learning rates between 0.0001 to 0.0006.
+* The model is trained for 50 epochs and learning rate of 0.0006 using batch size 128.
 * The **dataset** is a combination of samples I transformed from AT&T, LFW and my own. 
 
 Here below is the loss of the model after 50 epochs:
