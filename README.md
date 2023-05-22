@@ -15,11 +15,15 @@ To activate the system follow these steps:
 4. you are then ready to run: `python main.py`
 
 ### running example
-![img.png](images/terminal_view.png)
+![terminal_view.png](images/terminal_view.png)
 
 ### Dataset:
-The **dataset** is a combination of samples I transformed from AT&T, LFW and my own.
-To recreate a similar dataset use the functions in the **model/dataset.py** file.
+* The **dataset** is a combination of samples I transformed from AT&T, LFW and my own images.
+* I used 3 functions to augment the images:
+  1. horizontal flip
+  2. brightening
+  3. darkening
+* To recreate a similar dataset use the functions in the **model/dataset.py** file.
 #### Labels definition:
 `1.` for different subjects and `0.` for the same subject
 #### examples:

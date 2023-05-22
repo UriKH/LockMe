@@ -209,8 +209,6 @@ def train_parent():
 
 
 if __name__ == '__main__':
-    import torchvision.datasets as datasets
-
     transformation = transforms.Compose([transforms.Resize(config.INPUT_SIZE), transforms.ToTensor()])
     ds = ModelDataset(root=config.DATASET_PATH, transform=transformation)
     vis_dataloader = DataLoader(ds, shuffle=True, num_workers=1, batch_size=8)
@@ -220,5 +218,5 @@ if __name__ == '__main__':
     utils.imshow(tv.utils.make_grid(concatenated))
     print(example_batch[2].numpy().reshape(-1))
 
-    # train_parent()
-    # try_it()
+    train_parent()
+    try_it()
