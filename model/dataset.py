@@ -157,6 +157,32 @@ class ModelDataset(Dataset):
                     new_path = os.path.join(new_base_path, folder, file)
                     shutil.copy(old_path, new_path)
 
+    @staticmethod
+    def filter_faces(path):
+        """
+        Remove all images which not contain 1 face exactly
+        :param path: path to the dataset parent folder
+        """
+        folders = [os.path.join(path, directory) for directory in os.listdir(path) if
+                   os.path.isdir(os.path.join(path, directory))]
+        files = []
+        for folder in folders:
+            for file in os.listdir(folder):
+                files.append(os.path.join(folder, file))
+        device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+        mtcnn = MTCNN(
+            image_size=160, margin=0, min_face_size=20,
+            thresholds=[0.6, 0.7, 0.7], factor=0.709, post_process=True,
+            device=device
+        )
+
+        for file in files:
+            image = cv.imread(file)
+            boxes, conf = mtcnn.detect(image)
+            if boxes is None or len(boxes) != 1:
+                print(file)
+                os.remove(file)
+
     def cam_face_generation(self, path=None):
         """
         Generate face from the camera
