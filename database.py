@@ -2,13 +2,13 @@ import sqlite3
 import os
 import bz2 as bz
 import struct
-import cv2 as cv
 from tqdm import tqdm
 
 from encryption import Encryption
 from logger import Logger
 from messages import Messages as msg
 from keys import KeyMap
+from model.SNN import Net
 
 
 class Database:
@@ -82,21 +82,21 @@ class Database:
     @staticmethod
     def _embedding_to_byte(embedding):
         """
-        Transform a 512 float list embedding to bytes type
+        Transform a float list embedding to bytes type
         :param embedding: the embedding vector
         :return: the bytes type embedding
         """
-        embedding_b = bytearray(struct.pack('512f', *embedding))
+        embedding_b = bytearray(struct.pack(f'{Net.embedding_size}f', *embedding))
         return embedding_b
 
     @staticmethod
     def _byte_to_embedding(embedding_b):
         """
-        Transform bytes type embedding to a 512 float list
+        Transform bytes type embedding to a float list
         :param embedding_b: the bytes type embedding
         :return: the vectorized embedding
         """
-        embedding = struct.unpack('512f', embedding_b)
+        embedding = struct.unpack(f'{Net.embedding_size}f', embedding_b)
         return embedding
 
     def _recover(self, path, comp_file, key, locked_path):
@@ -158,7 +158,7 @@ class Database:
     def create_new_user(self, embedding):
         """
         ADD a new user to the system
-        :param embedding: a 512 embedding vector of the user's face
+        :param embedding: an embedding vector of the user's face
         :return: the new user's ID
         """
         embedding_b = Database._embedding_to_byte(embedding)

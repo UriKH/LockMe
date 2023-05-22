@@ -3,3 +3,4 @@ testing
 __pycache__
 .idea
 databases
+model\BCE2_C_BN-1_30_lr0006.pth

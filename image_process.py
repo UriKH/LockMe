@@ -71,6 +71,7 @@ class Image(Init):
                 self.y_pos = y
                 Logger(f'mouse clicked ({x}, {y})', Logger.info).log()
 
+        cv.namedWindow(Camera.window_name, cv.WINDOW_NORMAL)
         cv.setMouseCallback(Camera.window_name, mouse_callback)
 
         # draw an index box of the face

@@ -1,8 +1,11 @@
 import torch
+import numpy as np
 
 from image_process import Image
 from initialize import Init
 from database import Database
+from logger import Logger
+from messages import Messages as msg
 
 
 class User:
@@ -20,16 +23,19 @@ class User:
         :param data: data as [(ID, embedding) ...]
         :return: the ID of the user if in the DB else None
         """
-        min_dist = 100.
+        min_dist = 100
         identity = None
 
+        dist = 0
         for uid, e in data:
-            dist = (torch.tensor(list(e)) - self.embedding).norm()
+            e = torch.from_numpy(np.array(list(e))).to(torch.float32)
+            dist = Init.net.forward_embeddings(e, self.embedding).item()
             if dist < min_dist:
                 min_dist = dist
                 identity = uid
         if min_dist > User.dist_thresh:
             identity = None
+        Logger(msg.Info.login_distance_func + f' {dist:.2f}', Logger.info).log()
         return identity
 
     def login(self):
