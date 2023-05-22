@@ -5,11 +5,6 @@ import numpy as np
 from initialize import Init
 from image_process import Image
 
-# TODO: train admin system - ask Yuda.
-#  ? TF(most simple - a few lines)
-#  ? numpy(I write everything)
-#  ? mixed(more complex but not very complicated)?
-
 
 class Dataset:
     every = 1. / 24. * 6   # seconds

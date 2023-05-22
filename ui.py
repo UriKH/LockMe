@@ -1,6 +1,3 @@
-# all other classes like camera_runner should inherit from this class.
-# this class will define the outputs which are not from the terminal
-import cv2 as cv
 import os
 import pandas as pd
 

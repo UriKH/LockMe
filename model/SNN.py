@@ -14,6 +14,10 @@ class Net(nn.Module):
 
     def __init__(self):
         super(Net, self).__init__()
+        # conv block structure:
+        # input: 105 x 105 (1 depth)
+        # 2D convolution -> batch normalization -> ReLU activation -> max-pooling (2D) (-> drop-out)
+
         self.conv_block1 = nn.Sequential(
             nn.Conv2d(1, 64, 10),
             nn.BatchNorm2d(64),
@@ -44,24 +48,48 @@ class Net(nn.Module):
             nn.ReLU(inplace=True)
         )
 
+        # Calculate the output size of the conv layers
+        self.conv_output_size = self._get_conv_output_size()
+
         self.fc = nn.Sequential(
-            nn.Linear(256 * 6 * 6, 4096),
+            nn.Linear(self.conv_output_size, 4096),
             nn.Sigmoid()
         )
 
         self.fcOut = nn.Linear(4096, 1)
         self.sigmoid = nn.Sigmoid()
 
+    def _get_conv_output_size(self):
+        with torch.no_grad():
+            x = self.conv_block1(torch.zeros(1, 1, config.INPUT_SIZE[0], config.INPUT_SIZE[1]))
+            x = self.conv_block2(x)
+            x = self.conv_block3(x)
+            x = self.conv_block4(x)
+        return x.view(x.size(0), -1).size(1)
+
     def forward_once(self, x):
-        x = self.conv_block1(x)
-        x = self.conv_block2(x)
-        x = self.conv_block3(x)
-        x = self.conv_block4(x)
-        x = x.view(-1, 256 * 6 * 6)
+        """
+        Forward propagation through the convolutional part of the SNN
+        :param x: the transformed image
+        :return: embedding of the transformed image
+        """
+        # INPUT: 1 ,  105 x 105
+        x = self.conv_block1(x)     # 64,  48  x 48
+        x = self.conv_block2(x)     # 128, 21  x 21
+        x = self.conv_block3(x)     # 128, 9   x 9
+        x = self.conv_block4(x)     # 256, 6   x 6
+        x = x.view(-1, self.conv_output_size)
         x = self.fc(x)
         return x
 
     def forward(self, x1, x2):
+        """
+        Forward propagation through the SNN
+        This function is automatically called
+        :param x1: first transformed image
+        :param x2: second transformed image
+        :return: the prediction of the network
+        """
         x1 = self.forward_once(x1)
         x2 = self.forward_once(x2)
 
@@ -70,6 +98,12 @@ class Net(nn.Module):
         return x
 
     def forward_embeddings(self, x1, x2):
+        """
+        Run the SNN model on two image embeddings
+        :param x1: first face embedding
+        :param x2: second face embedding
+        :return: the prediction of the network
+        """
         x = torch.abs(x1 - x2)
         x = self.fcOut(x)
         return x

@@ -5,7 +5,6 @@ from initialize import Init
 from logger import Logger
 from messages import Messages as msg
 from model.dataset import ModelDataset
-import model.config as config
 
 
 class Image(Init):
