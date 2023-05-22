@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torchvision as tv
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 from torch import optim
@@ -12,6 +13,7 @@ from logger import Logger
 from dataset import ModelDataset
 from model.SNN import Net
 import model.config as config
+import model.model_utils as utils
 
 
 def train(net, train_loader: DataLoader, valid_loader: DataLoader,
@@ -207,5 +209,16 @@ def train_parent():
 
 
 if __name__ == '__main__':
-    train_parent()
-    try_it()
+    import torchvision.datasets as datasets
+
+    transformation = transforms.Compose([transforms.Resize(config.INPUT_SIZE), transforms.ToTensor()])
+    ds = ModelDataset(root=config.DATASET_PATH, transform=transformation)
+    vis_dataloader = DataLoader(ds, shuffle=True, num_workers=1, batch_size=8)
+    example_batch = next(iter(vis_dataloader))
+
+    concatenated = torch.cat((example_batch[0], example_batch[1]), 0)
+    utils.imshow(tv.utils.make_grid(concatenated))
+    print(example_batch[2].numpy().reshape(-1))
+
+    # train_parent()
+    # try_it()

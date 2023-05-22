@@ -5,8 +5,8 @@ Welcome to my software engineering class final project.
 The project consists of a file encryption app. 
 Login is via face detection, thus make sure you have a camera connected to your PC.
 
-# Usage
-## Activation
+## Usage
+### Activation
 To activate the system follow these steps:
 1. run: `pip install -r requirements.txt`
 2. use a Unix-based system to rebuild the model from parts in the **_model/model_parts_** directory using the command: 
@@ -14,16 +14,26 @@ To activate the system follow these steps:
 3. make sure the model name is written with the correct path in the configurations file in the model's directory
 4. you are then ready to run: `python main.py`
 
-## running example
+### running example
 ![img.png](images/terminal_view.png)
 
-# The Model
+### Dataset:
+The **dataset** is a combination of samples I transformed from AT&T, LFW and my own.
+To recreate a similar dataset use the functions in the **model/dataset.py** file.
+#### Labels definition:
+`1.` for different subjects and `0.` for the same subject
+#### examples:
+1. image pairs: ![example1.png](images/example1.png)
+labels: `[0. 1. 0. 0. 1. 0. 0. 1.]`
+
+2. image pairs: ![example2.png](images/example2.png)
+labels: `[0. 0. 0. 1. 0. 0. 1. 1.]`
+
+## The Model
 * I used the classic SNN architecture using binary cross entropy loss.
 * I tried a few models and loss functions such as triplet loss and contrastive loss with different learning rates 
 but BCE gave me the best results with the amount of data that I had.
 * The model is trained for 50 epochs and learning rate of 0.0006 using batch size 128.
-* The **dataset** is a combination of samples I transformed from AT&T, LFW and my own.
-To recreate a similar dataset use the functions in the **model/dataset.py** file.
 
 Here below is the loss and accuracy of the model after 50 epochs:
 
