@@ -6,7 +6,7 @@ The project consists of a file encryption app.
 Login is via face detection, thus make sure you have a camera connected to your PC.
 
 ## Usage
-### Activation
+### Installation
 To activate the system follow these steps:
 1. run: `pip install -r requirements.txt`
 2. use a Unix-based system to rebuild the model from parts in the **_model/model_parts_** directory using the command: 
