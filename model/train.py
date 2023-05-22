@@ -4,61 +4,17 @@ import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 from torch import optim
 from torchsummary import summary
-import torch.nn.functional as F
 import cv2 as cv
 import os
-
-from logger import Logger
-from SNN import ClassicModel
-from dataset import ModelDataset
-import config
-
 import matplotlib.pyplot as plt
 
-# def train(model, train_loader: DataLoader, valid_loader: DataLoader, optimizer: optim, criterion, epochs=10, ckpt=10):
-#     """
-#     Train the model
-#     TODO: Rewrite with validation testing, accuracy testing and graphs
-#     """
-#     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-#     cntr = []
-#     loss_hist = []
-#     iteration = 0
-#
-#     train_losses = []
-#     for epoch in range(epochs):
-#         running_loss = 0.0
-#         model.train()
-#         print("Starting epoch " + str(epoch + 1))
-#         for i, (img0, img1, label) in enumerate(loader, 0):
-#             img0, img1, label = img0.to(device), img1.to(device), label.to(device)
-#             out0, out1 = model(img0, img1)  # forward-prop
-#             dist = F.pairwise_distance(out0, out1)
-#             label = label.view(-1, 1).float()
-#             loss = criterion(dist.squeeze(), label.squeeze())  # calculate loss
-#
-#             optimizer.zero_grad()   # zero the gradients
-#             loss.backward()     # calculate back-prop
-#             optimizer.step()    # optimize
-#             running_loss += loss.item()
-#
-#             if i % ckpt == 0:
-#                 Logger(f'\nEpoch {epoch}:\n\tloss: {loss.item()}', Logger.info).log()
-#                 iteration += ckpt
-#                 cntr.append(iteration)
-#                 loss_hist.append(loss.item())
-#         avg_train_loss = running_loss / len(loader)
-#         train_losses.append(avg_train_loss)
-#         val_running_loss = 0.0
-#     utils.show_plot(cntr, loss_hist)
-#
-#     print("Finished Training")
-#     # Save the BCE_and_ContrastiveLoss parameters to a file
-#     torch.save(model.state_dict(), config.OUT_PATH)
-#     return train_losses
+from logger import Logger
+from dataset import ModelDataset
+from model.SNN import Net
+import model.config as config
 
 
-def train(net: ClassicModel, train_loader: DataLoader, valid_loader: DataLoader,
+def train(net, train_loader: DataLoader, valid_loader: DataLoader,
           optimizer: optim, criterion, epochs: int, checkpoint_interval: int = 5):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     net.to(device)
@@ -68,7 +24,7 @@ def train(net: ClassicModel, train_loader: DataLoader, valid_loader: DataLoader,
     valid_losses = []
     valid_accuracies = []
     suffix = 0
-    for model in os.listdir('checkpoints'):
+    for model in [file for file in os.listdir('checkpoints') if os.path.isfile(os.path.join(os.getcwd(), 'checkpoints', file))]:
         if int(model.split('_')[-1].split('.')[0]) > suffix:
             suffix = int(model.split('_')[-1].split('.')[0])
     print('=== Training started ===')
@@ -147,6 +103,8 @@ def train(net: ClassicModel, train_loader: DataLoader, valid_loader: DataLoader,
             torch.save(net.state_dict(), checkpoint_path)
             print(f'Saved checkpoint at epoch {epoch + suffix + 1}: {checkpoint_path}')
 
+    torch.save(net.state_dict(), config.OUT_PATH)
+
     # Plotting the results
     plt.figure(figsize=(10, 4))
 
@@ -187,7 +145,7 @@ def try_it(path=None):
     else:
         state_dict = torch.load(path)
 
-    net = ClassicModel().to(device)
+    net = Net().to(device)
     net.load_state_dict(state_dict)  # load the state dictionary into the BCE_and_ContrastiveLoss
 
     cap = cv.VideoCapture(0)
@@ -215,28 +173,26 @@ def try_it(path=None):
             frame2 = ModelDataset.create_image(frame, boxes[0])
             frame2 = cv.cvtColor(frame2, cv.COLOR_GRAY2BGR)
 
-            frame1 = ClassicModel.preprocess_image(frame1)
-            frame2 = ClassicModel.preprocess_image(frame2)
+            frame1 = Net.preprocess_image(frame1)
+            frame2 = Net.preprocess_image(frame2)
             frame1 = frame1.unsqueeze(0).to(device)
             frame2 = frame2.unsqueeze(0).to(device)
 
-            out1, out2 = net(frame1, frame2)
-            dist = F.pairwise_distance(out1, out2).item()
+            dist = net(frame1, frame2)
+            print(dist)
             frame1 = None
-            print(f'distance: {dist:.3f}')
         elif key == ord('q'):
             break
 
 
-if __name__ == '__main__':
+def train_parent():
     transformation = transforms.Compose([transforms.Resize(config.INPUT_SIZE), transforms.ToTensor()])
-
     ds = ModelDataset(root=config.DATASET_PATH, transform=transformation)
     train_loader, valid_loader = ds.split_dataset()
     Logger('Data loaded', Logger.info).log()
 
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-    net = ClassicModel().to(device)
+    net = Net().to(device)
 
     # load the saved parameters
     if config.FINE_TUNE:
@@ -245,8 +201,11 @@ if __name__ == '__main__':
 
     criterion = nn.BCEWithLogitsLoss()
     optimizer = optim.Adam(net.parameters(), lr=config.LEARNING_RATE)
-    summary(ClassicModel(), input_size=[config.INPUT_SHAPE, config.INPUT_SHAPE])
+    summary(Net(), input_size=[config.INPUT_SHAPE, config.INPUT_SHAPE])
 
-    train(net, train_loader, valid_loader, optimizer, criterion, epochs=config.EPOCHS)
+    train(net, train_loader, valid_loader, optimizer, criterion, config.EPOCHS)
 
-    # try_it()
+
+if __name__ == '__main__':
+    train_parent()
+    try_it()
