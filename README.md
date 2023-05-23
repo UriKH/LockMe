@@ -25,7 +25,8 @@ To activate the system follow these steps:
   3. darkening
 * To recreate a similar dataset use the functions in the **model/dataset.py** file.
 #### Labels definition:
-`1.` for different subjects and `0.` for the same subject
+* `1` - for smpleds of different subjects
+* `0` - for samples of the same subject
 #### examples:
 1. image pairs: ![example1.png](images/example1.png)
 labels: `[0. 1. 0. 0. 1. 0. 0. 1.]`
