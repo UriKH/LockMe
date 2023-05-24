@@ -30,4 +30,3 @@ class KeyMap:
     unlock_cmd = 'unlock'
     unlock_all_cmd = 'unlock_all'
     recover_cmd = 'recover'
-

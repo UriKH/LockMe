@@ -83,24 +83,3 @@ class Dataset:
             self.ds_path_y = f'{Dataset.parent_folder}\\y_test.npy'
         np.save(self.ds_path_x, np.array(x_set))
         np.save(self.ds_path_y, y_set)
-
-
-def run():
-    train = Dataset(r'data\train')
-    # test = Dataset('path to testing folder')
-
-    x_train = np.load(train.ds_path_x, allow_pickle=True)
-    y_train = np.load(train.ds_path_y, allow_pickle=True)
-    # x_test = np.load(test.ds_path_x)
-    # y_test = np.load(test.ds_path_y)
-
-    print("number of training examples = " + str(x_train.shape[0]))
-    # print("number of test examples = " + str(x_test.shape[0]))
-    print("X_train shape: " + str(x_train.shape))
-    print("Y_train shape: " + str(y_train.shape))
-    # print("X_test shape: " + str(x_test.shape))
-    # print("Y_test shape: " + str(y_test.shape))
-
-
-if __name__ == '__main__':
-    run()
