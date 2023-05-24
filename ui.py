@@ -164,7 +164,6 @@ def present_menu(user):
         if fully_exit is None:
             continue
         if fully_exit:
-            # Logger(msg.Info.goodbye, Logger.message).log()
             exit(0)
         else:
             return
