@@ -27,7 +27,8 @@ class Messages:
         This class represents all the constant general messages to the user
         """
         hello_world = '>>> Hello there! welcome to LockMe service <<<'
-        take_pic = f'To take a picture press \'{KeyMap.take_pic}\' (IMPORTANT: look at the camera)'
+        take_pic = f'To take a picture press \'{KeyMap.take_pic}\''
+        pic_instruction = f'Look directly at the camera for best recognition'
         retake_pic = f'To retake the image press \'{KeyMap.retake_pic}\' again, else \'{KeyMap.close_cam}\' to close'
         pic_taken = 'Picture taken'
         new_db_key = 'Congrats! new encryption key for the database was generated'

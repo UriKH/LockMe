@@ -16,7 +16,7 @@ class Camera:
         """
         self._v_cap = cv.VideoCapture(0)
         if self._v_cap is None:
-            Logger(msg.Errors.no_cam, level=Logger.error).log(Camera.__init__)
+            Logger(msg.Errors.no_cam, Logger.error).log(Camera.__init__)
 
         self._pic = None
         self._last_frame = None
@@ -25,7 +25,8 @@ class Camera:
         """
         Run the camera UI to capture an image of the user
         """
-        Logger(msg.Info.take_pic, level=Logger.message).log()
+        Logger(msg.Info.take_pic, Logger.message).log()
+        Logger(msg.Info.pic_instruction, Logger.warning).log()
 
         while True:
             self.read_stream()
@@ -36,18 +37,18 @@ class Camera:
             # taking the image
             if key == ord(KeyMap.take_pic):
                 cv.imshow(Camera.window_name, self.freeze())
-                Logger(msg.Info.retake_pic, level=Logger.message).log()
+                Logger(msg.Info.retake_pic, Logger.message).log()
 
                 while True:
                     cv.imshow(Camera.window_name, self.freeze())
                     key = cv.waitKey(1)
 
                     if key == ord(KeyMap.close_cam):    # close the camera
-                        Logger(msg.Info.pic_taken, level=Logger.message).log()
+                        Logger(msg.Info.pic_taken, Logger.message).log()
                         cv.destroyAllWindows()
                         return
                     elif key == ord(KeyMap.retake_pic):   # retake picture
-                        Logger(msg.Info.take_pic, level=Logger.message).log()
+                        Logger(msg.Info.take_pic, Logger.message).log()
                         break
 
     def read_stream(self):
