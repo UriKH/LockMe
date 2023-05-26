@@ -17,7 +17,7 @@ class User:
         self.uid = None
         self.valid = self.login()
 
-    def check_similarity(self, data):
+    def check_similarity(self, data: list):
         """
         Get the user ID
         :param data: data as [(ID, embedding) ...]

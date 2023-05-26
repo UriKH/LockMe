@@ -22,11 +22,13 @@ def main():
             user = User(user_img)
 
             if user.valid:
+                # known person detected
                 Logger('Access Granted', Logger.info).log()
                 Logger(msg.Info.user_login + f' {user.uid}', msg.Info).log()
 
                 ui.present_menu(user)
             else:
+                # unrecognized person detected
                 join = ui.continue_to_system()
                 if join:
                     user.uid = Init.database.create_new_user(user.embedding)

@@ -6,6 +6,7 @@ from messages import Messages as msg
 from keys import KeyMap
 from initialize import Init
 from database import Database
+from user_login import User
 
 commands = {KeyMap.exit_cmd: KeyMap.exit, KeyMap.add_cmd: KeyMap.add, KeyMap.remove_cmd: KeyMap.remove,
             KeyMap.delete_cmd: KeyMap.delete, KeyMap.trash_cmd: KeyMap.trash,
@@ -18,7 +19,7 @@ cmd_param = {KeyMap.add_cmd: 1, KeyMap.remove_cmd: 1, KeyMap.delete_cmd: 0, KeyM
              KeyMap.recover_cmd: 1, KeyMap.unlock_all_cmd: 0, KeyMap.lock_all_cmd: 0}
 
 
-def parse_n_call(cmd, line, user):
+def parse_n_call(cmd: str, line: str, user: User):
     """
     Parse and execute a command
     :param cmd: the command to be executed
@@ -79,7 +80,7 @@ def parse_n_call(cmd, line, user):
         Logger(msg.Info.back_to_routine, Logger.info).log()
 
 
-def present_data(data):
+def present_data(data: dict):
     """
     Present the data of the user
     :param data: a dictionary representing the user's data
@@ -96,10 +97,11 @@ def present_data(data):
     Logger(df, Logger.message).log(msg_prefix=' ')
 
 
-def delete_file(path, user):
+def delete_file(path: str, user: User):
     """
     Delete a file from disk
     :param path: the path to the file
+    :param user: a User object
     """
     try:
         remove_file(path, user)
@@ -110,7 +112,7 @@ def delete_file(path, user):
         Logger(msg.Info.back_to_routine, Logger.info).log()
 
 
-def add_file(path, user):
+def add_file(path: str, user: User):
     """
     Add a file to the user
     :param path: path to the file to remove
@@ -123,7 +125,7 @@ def add_file(path, user):
         Logger(msg.Info.back_to_routine, Logger.info).log()
 
 
-def remove_file(path, user):
+def remove_file(path: str, user: User):
     """
     Remove a file from the user's account
     :param path: path to the file to remove
@@ -136,7 +138,7 @@ def remove_file(path, user):
         Logger(msg.Info.back_to_routine, Logger.info).log()
 
 
-def present_menu(user):
+def present_menu(user: User):
     """
     Present a menu of options to the user and execute the user's requests
     :param user: An object of User class

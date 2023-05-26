@@ -9,6 +9,7 @@ from logger import Logger
 from messages import Messages as msg
 from keys import KeyMap
 from model.SNN import Net
+from user_login import User
 
 
 class Database:
@@ -155,7 +156,7 @@ class Database:
             data_dict['file_state'].append(row[4])
         return data_dict
 
-    def create_new_user(self, embedding):
+    def create_new_user(self, embedding: list):
         """
         ADD a new user to the system
         :param embedding: an embedding vector of the user's face
@@ -174,7 +175,7 @@ class Database:
         self.connection.commit()
         return max_id + 1
 
-    def get_user_embedding_as_key(self, uid):
+    def get_user_embedding_as_key(self, uid: int):
         """
         Retrieve the user face embedding from the DB and generate the key from it
         :param uid: the user ID
@@ -183,10 +184,10 @@ class Database:
         self.cursor.execute("SELECT user_embedding FROM users WHERE uid = ?", (uid,))
         embedding_b = self.cursor.fetchall()[0][0]
         embedding = Database._byte_to_embedding(embedding_b)
-        key = Encryption.key_from_embedding(embedding)
+        key = Encryption.key_from_embedding(list(embedding))
         return key
 
-    def __validate_action_on_file(self, path, user):
+    def __validate_action_on_file(self, path: str, user: User):
         """
         Check if the file is accessible and the user could change it
         :param path: path to the file
@@ -215,7 +216,7 @@ class Database:
             return False
         return True, {'file_path': path, 'uid': user.uid, 'suffix': suffix, 'file': comp_file, 'file_state': file_state}
 
-    def add_file(self, path, user):
+    def add_file(self, path: str, user: User):
         """
         Add a file to the DB
         :param path: the path to the file to be added
@@ -257,7 +258,7 @@ class Database:
         Logger(msg.Info.file_added + f' {path}', Logger.info).log()
         return True
 
-    def remove_file(self, path, user):
+    def remove_file(self, path: str, user: User):
         """
         Remove a file from the DB
         :param path: the path to the file to remove
@@ -277,7 +278,7 @@ class Database:
         Logger(msg.Info.file_removed + f' {path}', Logger.info).log()
         return True
 
-    def lock_file(self, path, user):
+    def lock_file(self, path: str, user: User):
         """
         Encrypt a file and update the backup to the latest version
         :param path: the path to the file
@@ -311,7 +312,7 @@ class Database:
         except:
             self._recover(path, db_data['file'], key, locked_path)
 
-    def unlock_file(self, path, user):
+    def unlock_file(self, path: str, user: User):
         """
         Decrypts a file
         :param path: path to the file
@@ -334,7 +335,7 @@ class Database:
         self.connection.commit()
         return True
 
-    def decrypt_user_file(self, path, user, db_data):
+    def decrypt_user_file(self, path: str, user: User, db_data):
         """
         Decrypts a locked file for a user
         :param path: path to the file
@@ -353,7 +354,7 @@ class Database:
         except:
             self._recover(path, db_data['file'], key, locked_path)
 
-    def lock_all_files(self, uid=None):
+    def lock_all_files(self, uid: int = None):
         """
         Lock all files owned by the specified ID. If no ID is specified, lock all the system files
         :param uid: user ID
@@ -385,7 +386,7 @@ class Database:
             self.connection.commit()
         print()     # this is a bug fix of tqdm covering the input line
 
-    def unlock_all_files(self, uid=None):
+    def unlock_all_files(self, uid: int = None):
         """
         Unlock all files owned by the specified ID. If no ID is specified, unlock all the system files
         :param uid: user ID
@@ -416,7 +417,7 @@ class Database:
             self.connection.commit()
         print()  # this is a bug fix of tqdm covering the input line
 
-    def delete_user(self, uid):
+    def delete_user(self, uid: int):
         """
         Delete a user from the system
         :param uid: the user ID
@@ -438,7 +439,7 @@ class Database:
             elif ans == KeyMap.no:
                 return False
 
-    def recover_file(self, path, user):
+    def recover_file(self, path: str, user: User):
         """
         Recover a file from latest saved version
         :param path: path to the file as it is saved in the system

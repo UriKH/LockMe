@@ -18,7 +18,7 @@ class Encryption:
         self.locked_path = '.'.join([clean_path, 'locked'])
         self.org_path = '.'.join([clean_path, suffix])
 
-    def encrypt_file(self, log=True):
+    def encrypt_file(self, log: bool = True):
         """
         Encrypt the file
         :return: the encrypted file contents
@@ -35,7 +35,7 @@ class Encryption:
         os.rename(self.org_path, self.locked_path)
         return enc_data
 
-    def decrypt_file(self, log=True):
+    def decrypt_file(self, log: bool = True):
         """
         Decrypt the file
         :return: the decrypted contents
@@ -92,7 +92,7 @@ class Encryption:
         return enc_key.encode('utf-8')
 
     @staticmethod
-    def key_from_embedding(embedding):
+    def key_from_embedding(embedding: list):
         """
         Generate a 128 bits key from float vector
         :param embedding: A float vector representing an image
@@ -115,7 +115,7 @@ class Encryption:
         return key
 
     @staticmethod
-    def encrypt_data(data, key):
+    def encrypt_data(data: bytes, key):
         """
         Encrypt some data with a fernet key
         :param data: the data
@@ -126,7 +126,7 @@ class Encryption:
         return fernet.encrypt(data)
 
     @staticmethod
-    def decrypt_data(data, key):
+    def decrypt_data(data: bytes, key):
         """
         Decrypt some data with a fernet key
         :param data: the data
