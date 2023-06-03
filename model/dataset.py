@@ -1,6 +1,7 @@
 import os
 import random
 import shutil
+import sys
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -123,34 +124,42 @@ class ModelDataset(Dataset):
             thresholds=[0.6, 0.7, 0.7], factor=0.709, post_process=True,
             device=device
         )
-
+        os.mkdir(r'C:\LockMe_DATA\temp_tag')
         people = os.listdir(parent)
+        index = start + 1
         for i, p in enumerate(people):
-            new_dir = os.path.join(parent, f's{i + 1 + start}')
+            new_dir = os.path.join(r'C:\LockMe_DATA\temp_tag', f's{index}')
             os.makedirs(new_dir)
+            valid = True
             for j, file in enumerate(os.listdir(os.path.join(parent, p))):
                 image = cv.imread(os.path.join(parent, p, file))
                 boxes, conf = mtcnn.detect(image)
-                if boxes is None or len(boxes) == 0:
+                if boxes is None or len(boxes) != 1:
                     print(f'oops, get another image for {os.path.join(parent, p, file)}!')
-                    continue
+                    valid = False
+                    break
                 boxes = boxes.astype(int)
                 boxes = [box for i, box in enumerate(boxes)]
                 frame = ModelDataset.create_image(image, boxes[0])
                 cv.imwrite(os.path.join(new_dir, f'{j + 1}.pgm'), frame)
+            if not valid:
+                shutil.rmtree(new_dir)
+            else:
+                index += 1
 
     @staticmethod
-    def filter_lfw(path_to_lfw, new_base_path, threshold=10):
+    def filter_ds(path_to_lfw, new_base_path, lower=1, upper=sys.maxsize):
         """
         Filter the LFW database for subjects with more images that the threshold
         :param path_to_lfw: the path to the current LFW folder
         :param new_base_path: path to the filtered dataset
-        :param threshold: the amount of samples to filter on
+        :param lower: the minimum amount of samples
+        :param upper: the maximum amount of samples
         """
         folders = os.listdir(path_to_lfw)
         for folder in folders:
             dir_path = os.path.join(path_to_lfw, folder)
-            if len(os.listdir(dir_path)) >= threshold:
+            if lower <= len(os.listdir(dir_path)) <= upper:
                 os.mkdir(os.path.join(new_base_path, folder))
                 for file in os.listdir(dir_path):
                     old_path = os.path.join(dir_path, file)

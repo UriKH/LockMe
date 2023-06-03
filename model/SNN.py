@@ -16,14 +16,14 @@ class Net(nn.Module):
         super(Net, self).__init__()
         # conv block structure:
         # input: 105 x 105 (1 depth)
-        # 2D convolution -> batch normalization -> ReLU activation -> max-pooling (2D) (-> drop-out)
+        # 2D convolution -> batch normalization -> ReLU activation -> max-pooling (2D) -> drop-out
 
         self.conv_block1 = nn.Sequential(
             nn.Conv2d(1, 64, 10),
             nn.BatchNorm2d(64),
             nn.ReLU(inplace=True),
             nn.MaxPool2d((2, 2)),
-            nn.Dropout(0.0)
+            nn.Dropout(0.6) # was 0.2
         )
 
         self.conv_block2 = nn.Sequential(
@@ -31,7 +31,7 @@ class Net(nn.Module):
             nn.BatchNorm2d(128),
             nn.ReLU(inplace=True),
             nn.MaxPool2d((2, 2)),
-            nn.Dropout(0.0)
+            nn.Dropout(0.6)
         )
 
         self.conv_block3 = nn.Sequential(
@@ -39,7 +39,7 @@ class Net(nn.Module):
             nn.BatchNorm2d(128),
             nn.ReLU(inplace=True),
             nn.MaxPool2d((2, 2)),
-            nn.Dropout(0.0)
+            nn.Dropout(0.6)
         )
 
         self.conv_block4 = nn.Sequential(

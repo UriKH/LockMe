@@ -4,6 +4,7 @@ import torchvision as tv
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 from torch import optim
+from torch.optim.lr_scheduler import StepLR
 from torchsummary import summary
 import cv2 as cv
 import os
@@ -17,7 +18,7 @@ import model.model_utils as utils
 
 
 def train(net, train_loader: DataLoader, valid_loader: DataLoader,
-          optimizer: optim, criterion, epochs: int, checkpoint_interval: int = 5):
+          optimizer: optim, scheduler, criterion, epochs: int, checkpoint_interval: int = 5):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     net.to(device)
 
@@ -26,6 +27,7 @@ def train(net, train_loader: DataLoader, valid_loader: DataLoader,
     valid_losses = []
     valid_accuracies = []
     suffix = 0
+
     for model in [file for file in os.listdir('checkpoints') if os.path.isfile(os.path.join(os.getcwd(), 'checkpoints', file))]:
         if int(model.split('_')[-1].split('.')[0]) > suffix:
             suffix = int(model.split('_')[-1].split('.')[0])
@@ -50,13 +52,17 @@ def train(net, train_loader: DataLoader, valid_loader: DataLoader,
             loss.backward()
             optimizer.step()
 
+            # Update the learning rate
+            scheduler.step()
+
             train_loss += loss.item()
             train_correct += (predicted_labels.squeeze() == labels.squeeze()).sum().item()
             total_train += labels.size(0)
 
-            if i % checkpoint_interval == 0:
+            if i % 5 == 0:
                 train_accuracy = 100.0 * train_correct / total_train
                 print(f'\tcurrent loss: {loss.item()}, current accuracy: {train_accuracy}')
+
 
         train_accuracy = 100.0 * train_correct / total_train
         train_loss /= len(train_loader)
@@ -82,7 +88,7 @@ def train(net, train_loader: DataLoader, valid_loader: DataLoader,
                 valid_correct += (predicted_labels.squeeze() == labels.squeeze()).sum().item()
                 total_valid += labels.size(0)
 
-                if i % checkpoint_interval == 0:
+                if i % 5 == 0:
                     valid_accuracy = 100.0 * valid_correct / total_valid
                     print(f'\tcurrent loss: {loss.item()}, current accuracy: {valid_accuracy}')
 
@@ -100,7 +106,7 @@ def train(net, train_loader: DataLoader, valid_loader: DataLoader,
         valid_accuracies.append(valid_accuracy)
 
         # Save checkpoint
-        if (epoch + 1) % 2 == 0:
+        if (epoch + 1) % checkpoint_interval == 0:
             checkpoint_path = os.path.join(os.getcwd(), 'checkpoints', f'checkpoint_epoch_{epoch + 1}.pth')
             torch.save(net.state_dict(), checkpoint_path)
             print(f'Saved checkpoint at epoch {epoch + suffix + 1}: {checkpoint_path}')
@@ -189,8 +195,10 @@ def try_it(path=None):
 
 def train_parent():
     transformation = transforms.Compose([transforms.Resize(config.INPUT_SIZE), transforms.ToTensor()])
-    ds = ModelDataset(root=config.DATASET_PATH, transform=transformation)
-    train_loader, valid_loader = ds.split_dataset()
+    train_ds = ModelDataset(root=config.TRAIN_DATASET_PATH, transform=transformation)
+    valid_ds = ModelDataset(root=config.TEST_DATASET_PATH, transform=transformation)
+    train_loader = DataLoader(train_ds, batch_size=config.BATCH_SIZE, shuffle=True, num_workers=utils.get_workers())
+    valid_loader = DataLoader(valid_ds, batch_size=config.BATCH_SIZE, shuffle=False, num_workers=utils.get_workers())
     Logger('Data loaded', Logger.info).log()
 
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -202,21 +210,12 @@ def train_parent():
         net.load_state_dict(state_dict)  # load the state dictionary into the BCE_and_ContrastiveLoss
 
     criterion = nn.BCEWithLogitsLoss()
-    optimizer = optim.Adam(net.parameters(), lr=config.LEARNING_RATE)
+    optimizer = optim.Adam(net.parameters(), lr=config.LEARNING_RATE)   # define the optimizer
+    scheduler = StepLR(optimizer, step_size=2, gamma=0.99)  # Define the scheduler
     summary(Net(), input_size=[config.INPUT_SHAPE, config.INPUT_SHAPE])
 
-    train(net, train_loader, valid_loader, optimizer, criterion, config.EPOCHS)
+    train(net, train_loader, valid_loader, optimizer, scheduler, criterion, config.EPOCHS, checkpoint_interval=2)
 
 
 if __name__ == '__main__':
-    transformation = transforms.Compose([transforms.Resize(config.INPUT_SIZE), transforms.ToTensor()])
-    ds = ModelDataset(root=config.DATASET_PATH, transform=transformation)
-    vis_dataloader = DataLoader(ds, shuffle=True, num_workers=1, batch_size=8)
-    example_batch = next(iter(vis_dataloader))
-
-    concatenated = torch.cat((example_batch[0], example_batch[1]), 0)
-    utils.imshow(tv.utils.make_grid(concatenated))
-    print(example_batch[2].numpy().reshape(-1))
-
     train_parent()
-    try_it()

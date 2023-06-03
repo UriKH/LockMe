@@ -9,7 +9,7 @@ from logger import Logger
 from messages import Messages as msg
 from keys import KeyMap
 from model.SNN import Net
-from user_login import User
+# from user_login import User # could not import the User bcs of circular input...
 
 
 class Database:
@@ -187,7 +187,7 @@ class Database:
         key = Encryption.key_from_embedding(list(embedding))
         return key
 
-    def __validate_action_on_file(self, path: str, user: User):
+    def __validate_action_on_file(self, path: str, user):
         """
         Check if the file is accessible and the user could change it
         :param path: path to the file
@@ -216,7 +216,7 @@ class Database:
             return False
         return True, {'file_path': path, 'uid': user.uid, 'suffix': suffix, 'file': comp_file, 'file_state': file_state}
 
-    def add_file(self, path: str, user: User):
+    def add_file(self, path: str, user):
         """
         Add a file to the DB
         :param path: the path to the file to be added
@@ -258,7 +258,7 @@ class Database:
         Logger(msg.Info.file_added + f' {path}', Logger.info).log()
         return True
 
-    def remove_file(self, path: str, user: User):
+    def remove_file(self, path: str, user):
         """
         Remove a file from the DB
         :param path: the path to the file to remove
@@ -278,7 +278,7 @@ class Database:
         Logger(msg.Info.file_removed + f' {path}', Logger.info).log()
         return True
 
-    def lock_file(self, path: str, user: User):
+    def lock_file(self, path: str, user):
         """
         Encrypt a file and update the backup to the latest version
         :param path: the path to the file
@@ -312,7 +312,7 @@ class Database:
         except:
             self._recover(path, db_data['file'], key, locked_path)
 
-    def unlock_file(self, path: str, user: User):
+    def unlock_file(self, path: str, user):
         """
         Decrypts a file
         :param path: path to the file
@@ -335,7 +335,7 @@ class Database:
         self.connection.commit()
         return True
 
-    def decrypt_user_file(self, path: str, user: User, db_data):
+    def decrypt_user_file(self, path: str, user, db_data):
         """
         Decrypts a locked file for a user
         :param path: path to the file
@@ -439,7 +439,7 @@ class Database:
             elif ans == KeyMap.no:
                 return False
 
-    def recover_file(self, path: str, user: User):
+    def recover_file(self, path: str, user):
         """
         Recover a file from latest saved version
         :param path: path to the file as it is saved in the system
