@@ -1,8 +1,17 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 import tkinter.filedialog as filedialog
+import tkinter.messagebox as messagebox
 import cv2
 from PIL import Image, ImageTk
+import os
+
+from messages import Messages as msg
+from logger import Logger
+from initialize import Init
+from user_login import User
+from keys import KeyMap
+from database import Database
 
 
 class BaseWindow(tk.Tk):
@@ -57,6 +66,7 @@ class LoginWindow(tk.Frame):
         self.camera = cv2.VideoCapture(0)
         self.captured = False
         self.captured_image = None
+        self.user = None
 
         self.update_camera()  # Start updating the camera view
 
@@ -79,9 +89,11 @@ class LoginWindow(tk.Frame):
         self.capture_button.configure(state=tk.DISABLED)  # Disable capture button
 
         _, frame = self.camera.read()
+        self.captured_image = frame
+
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        self.captured_image = Image.fromarray(rgb_frame)
-        image = ImageTk.PhotoImage(self.captured_image)
+        captured_image = Image.fromarray(rgb_frame)
+        image = ImageTk.PhotoImage(captured_image)
         self.label.configure(image=image)
         self.label.image = image
 
@@ -95,15 +107,26 @@ class LoginWindow(tk.Frame):
     def login(self):
         if self.captured:
             # Perform face verification using the captured image
-            # Add your login logic here
+            self.user = User(self.captured_image)
+            switch_win = False
 
-            # Simulating successful login
-            successful_login = True
-
-            if successful_login:
-                self.parent.switch_frame(MainWindow(self.parent, self.get_window_size()))
+            if self.user.valid:
+                # known person detected
+                Logger('Access Granted', Logger.info).log()
+                Logger(msg.Info.user_login + f' {self.user.uid}', msg.Info).log()
+                switch_win = True
             else:
-                print("Login failed")
+                # Prompt user to join the system with a popup window
+                join = messagebox.askyesno("Login Failed", "Login failed. Do you want to join the system?")
+                if join:
+                    self.user.uid = Init.database.create_new_user(self.user.embedding)
+                    Logger(msg.Info.user_login + f' {self.user.uid}', msg.Info).log()
+                    switch_win = True
+                else:
+                    self.user = None
+
+            if switch_win:
+                self.parent.switch_frame(MainWindow(self.parent, self.get_window_size(), self.user))
 
     def clear_content(self):
         self.frame.pack_forget()
@@ -117,10 +140,11 @@ class LoginWindow(tk.Frame):
 
 
 class MainWindow(tk.Frame):
-    def __init__(self, parent, login_window_size):
+    def __init__(self, parent, login_window_size, user):
         super().__init__(parent)
         self.parent = parent
         self.login_window_size = login_window_size
+        self.user = user
 
         self.sidebar_frame = ttk.Frame(self, width=150)
         self.sidebar_frame.pack(fill=tk.Y, side=tk.LEFT)
@@ -128,94 +152,111 @@ class MainWindow(tk.Frame):
         self.button_frame = tk.Frame(self)
         self.button_frame.pack(padx=10, pady=10)
 
-        self.button_map = {
-            "Add Files": self.create_add_files_frame,
-            "Remove Files": self.create_remove_files_frame,
-            "Delete Files": self.create_delete_files_frame,
-            "Show Status": self.create_show_status_frame,
-            "Lock/Unlock Files": self.create_lock_unlock_files_frame,
-            "Recover File": self.create_recover_file_frame
+        self.buttons = {
+            KeyMap.add_files: self.create_button,
+            KeyMap.rm_files: self.create_button,
+            KeyMap.del_files: self.create_button,
+            KeyMap.lock_files: self.create_button,
+            KeyMap.unlock_files: self.create_button,
+            KeyMap.show_stat: self.create_show_status_frame,
+            KeyMap.recover_files: self.create_button
         }
 
         self.sidebar_buttons = []
-        for button_text in self.button_map.keys():
+        for button_text in self.buttons.keys():
             button = ttk.Button(self.sidebar_frame, text=button_text, command=lambda text=button_text: self.switch_button_frame(text))
             button.pack(pady=5)
             self.sidebar_buttons.append(button)
 
-        self.logout_button = ttk.Button(self.sidebar_frame, text="Logout", style="Yellow.TButton", command=self.logout)
+        self.logout_button = ttk.Button(self.sidebar_frame, text=KeyMap.logout, style="Yellow.TButton", command=self.logout)
         self.logout_button.pack(pady=10)
 
-        self.delete_user_button = ttk.Button(self.sidebar_frame, text="Delete User", style="Red.TButton")
+        self.delete_user_button = ttk.Button(self.sidebar_frame, text=KeyMap.del_user, style="Red.TButton", command=self.delete_user)
         self.delete_user_button.pack()
 
         self.current_button_frame = None
 
         self.table_frame = None
 
+    def create_button(self, button_text):
+        frame = tk.Frame(self.button_frame)
+
+        add_files_label = tk.Label(frame, text=button_text)
+        add_files_label.pack()
+
+        self.choose_files_ui(frame, button_text)
+        return frame
+
     def switch_button_frame(self, button_text):
         if self.current_button_frame is not None:
             self.current_button_frame.destroy()
 
-        if button_text == "Show Status":
-            self.create_show_status_frame()
+        if button_text == KeyMap.show_stat:
+            self.current_button_frame = self.create_show_status_frame()
         else:
-            create_frame_func = self.button_map.get(button_text)
+            create_frame_func = self.buttons.get(button_text)
             if create_frame_func:
-                self.current_button_frame = create_frame_func()
+                self.current_button_frame = create_frame_func(button_text)
+
+            if self.current_button_frame:
                 self.current_button_frame.pack()
                 # Remove the status table if it exists
                 if self.table_frame is not None:
                     self.table_frame.destroy()
                     self.table_frame = None
 
-    def choose_files_ui(self, frame):
+    def choose_files_ui(self, frame, command):
         file_listbox = tk.Listbox(frame, selectmode=tk.MULTIPLE, width=50, height=10)
         file_listbox.pack()
 
         def choose_files():
+            nonlocal command
+
             selected_paths = filedialog.askopenfilenames()
             if selected_paths:
                 for file_path in selected_paths:
                     file_listbox.insert(tk.END, file_path)
-                self.run_command(selected_paths)
+                self.run_command(selected_paths, command)
 
         choose_files_button = ttk.Button(frame, text="Choose Files", command=choose_files)
         choose_files_button.pack()
 
-    def run_command(self, paths):
-        print(paths)
+    def run_command(self, paths, cmd):
+        for path in paths:
+            try:
+                if cmd == KeyMap.add_files:
+                    Init.database.add_file(path, self.user)
+                elif cmd == KeyMap.rm_files:
+                    Init.database.remove_file(path, self.user)
+                elif cmd == KeyMap.lock_files:
+                    Init.database.lock_file(path, self.user)
+                elif cmd == KeyMap.unlock_files:
+                    Init.database.unlock_file(path, self.user)
+                elif cmd == KeyMap.del_files:
+                    Init.database.remove_file(path, self.user)
+                    os.remove(path)
+                    Logger(msg.Info.file_deleted + f' {path}', Logger.warning).log()
+                elif cmd == KeyMap.recover_files:
+                    Init.database.recover_file(path, self.user)
+            except Exception as e:
+                Logger(e, Logger.inform).log()
+                Logger(msg.Info.back_to_routine, Logger.info).log()
 
-    def create_add_files_frame(self):
-        frame = tk.Frame(self.button_frame)
+    @staticmethod
+    def clean_data(data: dict):
+        """
+        Present the data of the user
+        :param data: a dictionary representing the user's data
+        """
+        data = data.copy()
 
-        add_files_label = tk.Label(frame, text="Add Files")
-        add_files_label.pack()
+        del data['file']
+        del data['user_id']
+        data['file_state'] = ['locked' if state == Database.file_state_locked else 'open' for state in
+                              data['file_state']]
+        return {data['file_path'][i]: (data['suffix'][i], data['file_state'][i], ) for i in range(len(data['file_path']))}
 
-        self.choose_files_ui(frame)
-        return frame
-
-    def create_remove_files_frame(self):
-        frame = tk.Frame(self.button_frame)
-
-        # Add your remove files UI elements here
-        remove_files_label = tk.Label(frame, text="Remove Files")
-        remove_files_label.pack()
-
-        self.choose_files_ui(frame)
-        return frame
-
-    def create_delete_files_frame(self):
-        frame = tk.Frame(self.button_frame)
-
-        # Add your delete files UI elements here
-        delete_files_label = tk.Label(frame, text="Delete Files")
-        delete_files_label.pack()
-
-        self.choose_files_ui(frame)
-        return frame
-
-    def create_show_status_frame(self):
+    def create_show_status_frame(self, *args):
         if self.table_frame is not None:
             return self.table_frame
 
@@ -225,21 +266,18 @@ class MainWindow(tk.Frame):
         show_status_label = tk.Label(frame, text="Show Status")
         show_status_label.pack()
 
-        table = ttk.Treeview(frame)
-        table["columns"] = ("Status")
-        table.heading("#0", text="File")
-        table.heading("Status", text="Status")
+        data = Init.database.fetch_user_data(self.user.uid)
+        data = MainWindow.clean_data(data)
 
-        # Example data
-        file_data = {
-            "file1.txt": "Modified",
-            "file2.txt": "Unmodified",
-            "file3.txt": "Modified",
-            "file4.txt": "Unmodified"
-        }
+        table = ttk.Treeview(frame, columns=("File path", "File suffix", "State"))
+        table.heading("File path", text="File path")
+        table.heading("File suffix", text="File suffix")
+        table.heading("State", text="State")
 
-        for file, status in file_data.items():
-            table.insert("", tk.END, text=file, values=(status))
+        table.column("#0", width=0)
+
+        for file, val in data.items():
+            table.insert("", tk.END, values=(file, *val))
 
         table.pack(fill=tk.BOTH, expand=True)
 
@@ -248,29 +286,14 @@ class MainWindow(tk.Frame):
 
         return frame
 
-    def create_lock_unlock_files_frame(self):
-        frame = tk.Frame(self.button_frame)
-
-        # Add your lock/unlock files UI elements here
-        lock_unlock_label = tk.Label(frame, text="Lock/Unlock Files")
-        lock_unlock_label.pack()
-
-        self.choose_files_ui(frame)
-        return frame
-
-    def create_recover_file_frame(self):
-        frame = tk.Frame(self.button_frame)
-
-        # Add your recover file UI elements here
-        recover_file_label = tk.Label(frame, text="Recover File")
-        recover_file_label.pack()
-
-        self.choose_files_ui(frame)
-
-        return frame
-
     def logout(self):
+        Logger(msg.Info.logging_off, Logger.message).log()
+        Init.database.lock_all_files(self.user.uid)
         self.parent.switch_frame(LoginWindow(self.parent))
+
+    def delete_user(self):
+        Init.database.delete_user(self.user.uid)
+        Logger(msg.Info.logging_off, Logger.message).log()
 
     def destroy(self):
         if self.table_frame is not None:
@@ -279,4 +302,3 @@ class MainWindow(tk.Frame):
 
     def get_window_size(self):
         return self.winfo_width(), self.winfo_height()
-

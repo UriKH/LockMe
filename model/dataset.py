@@ -74,7 +74,6 @@ class ModelDataset(Dataset):
         valid_loader = DataLoader(valid_dataset, batch_size=config.BATCH_SIZE, shuffle=False, num_workers=utils.get_workers())
         return train_loader, valid_loader
 
-
     @staticmethod
     def create_image(image, box):
         """

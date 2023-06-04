@@ -1,5 +1,5 @@
 import cv2 as cv
-from keys import KeyMap
+from terminal_ui.keys import KeyMap
 from messages import Messages as msg
 from logger import Logger
 

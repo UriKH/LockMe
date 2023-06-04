@@ -29,5 +29,5 @@ class Init:
             device=Init.device
         )
         Init.net = Net()
-        state_dict = torch.load(os.path.join(os.getcwd(), 'model', config.MODEL_NAME))
+        state_dict = torch.load(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'model', config.MODEL_NAME))
         Init.net.load_state_dict(state_dict)

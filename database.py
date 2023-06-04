@@ -7,20 +7,21 @@ from tqdm import tqdm
 from encryption import Encryption
 from logger import Logger
 from messages import Messages as msg
-from keys import KeyMap
+from terminal_ui.keys import KeyMap
 from model.SNN import Net
 # from user_login import User # could not import the User bcs of circular input...
 
 
 class Database:
-    org_path = r'.\databases\database.db'
-    locked_path = r'.\databases\database.locked'
+    parent_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'databases')
+    org_path = os.path.join(parent_dir, r'database.db')
+    locked_path = os.path.join(parent_dir, r'database.locked')
     file_state_open = 1
     file_state_locked = 0
 
     def __init__(self):
-        if 'databases' not in os.listdir('.'):
-            os.mkdir('.\\databases')
+        if not os.path.exists(Database.parent_dir):
+            os.mkdir(Database.parent_dir)
         self.enc_track = Encryption(Database.locked_path, None, 'db', is_db=True)   # track encryption of the database
         if os.path.exists(Database.locked_path):
             self.enc_track.decrypt_file()
@@ -115,7 +116,7 @@ class Database:
         if os.path.exists(locked_path):
             os.remove(locked_path)
         self.cursor.execute("UPDATE files SET file_state = ? WHERE file_path = ?",
-                            (Database.file_state_open, path))
+                            (Database.file_state_open, Database.raw_path(path)))
         self.connection.commit()
         Logger(msg.Info.file_recovered + f' {path}', Logger.info).log()
 
@@ -227,7 +228,7 @@ class Database:
         self.cursor.execute("SELECT file_path, uid FROM files")
         res = self.cursor.fetchall()
         for row in res:
-            if path == row[0]:
+            if Database.raw_path(path) == row[0]:
                 Logger(msg.Errors.failed_insertion + f' - owner ID: {row[1]}', Logger.inform).log()
                 return False
 
@@ -253,7 +254,7 @@ class Database:
         comp_data = Database._compress_data(enc_data)
         self.cursor.execute(
             "INSERT INTO files (file_path, suffix, uid, file, file_state) VALUES (?, ?, ?, ?, ?)",
-            (path, suffix, user.uid, comp_data, Database.file_state_open))
+            (Database.raw_path(path), suffix, user.uid, comp_data, Database.file_state_open))
         self.connection.commit()
         Logger(msg.Info.file_added + f' {path}', Logger.info).log()
         return True
@@ -266,14 +267,14 @@ class Database:
         :return: True if the file removed successfully
         """
         # check if action is valid on the file
-        valid, db_data = self.__validate_action_on_file(path, user)
+        valid, db_data = self.__validate_action_on_file(Database.raw_path(path), user)
         if not valid:
             return False
 
         self.decrypt_user_file(path, user, db_data)
 
         # delete the file from the database
-        self.cursor.execute("DELETE FROM files WHERE file_path = ?", (path,))
+        self.cursor.execute("DELETE FROM files WHERE file_path = ?", (Database.raw_path(path),))
         self.connection.commit()
         Logger(msg.Info.file_removed + f' {path}', Logger.info).log()
         return True
@@ -286,7 +287,7 @@ class Database:
         :return: True if encrypted successfully
         """
         # check if action is valid on the file
-        valid, db_data = self.__validate_action_on_file(path, user)
+        valid, db_data = self.__validate_action_on_file(Database.raw_path(path), user)
         if not valid:
             return False
 
@@ -306,7 +307,7 @@ class Database:
 
             # change the file state in the database and update to the latest version
             self.cursor.execute("UPDATE files SET file_state = ?, file = ? WHERE file_path = ?",
-                                (Database.file_state_locked, comp_data, path))
+                                (Database.file_state_locked, comp_data, Database.raw_path(path)))
             self.connection.commit()
             return True
         except:
@@ -319,7 +320,7 @@ class Database:
         :param user: a User object
         """
         # check if action is valid on the file
-        valid, db_data = self.__validate_action_on_file(path, user)
+        valid, db_data = self.__validate_action_on_file(Database.raw_path(path), user)
         if not valid:
             return False
 
@@ -331,7 +332,8 @@ class Database:
         self.decrypt_user_file(path, user, db_data)
 
         # change the file state in the database
-        self.cursor.execute("UPDATE files SET file_state = ? WHERE file_path = ?", (Database.file_state_open, path))
+        self.cursor.execute("UPDATE files SET file_state = ? WHERE file_path = ?",
+                            (Database.file_state_open, Database.raw_path(path)))
         self.connection.commit()
         return True
 
@@ -376,7 +378,7 @@ class Database:
 
             # encrypt the file
             key = self.get_user_embedding_as_key(data_dict['user_id'][i])
-            file_enc = Encryption(path, key, data_dict['suffix'][i])
+            file_enc = Encryption(f'{path}.{data_dict["suffix"][i]}', key, data_dict['suffix'][i])
             enc_data = file_enc.encrypt_file(log=False)
             comp_data = Database._compress_data(enc_data)
 
@@ -408,7 +410,7 @@ class Database:
 
             # encrypt the file
             key = self.get_user_embedding_as_key(data_dict['user_id'][i])
-            file_enc = Encryption(path, key, data_dict['suffix'][i])
+            file_enc = Encryption(f'{path}.{data_dict["suffix"][i]}', key, data_dict['suffix'][i])
             file_enc.decrypt_file(log=False)
 
             # change the file state in the database
@@ -446,10 +448,14 @@ class Database:
         :param user: a User object
         """
         # check if action is valid on the file
-        valid, db_data = self.__validate_action_on_file(path, user)
+        valid, db_data = self.__validate_action_on_file(Database.raw_path(path), user)
         if not valid:
             return False
 
         key = self.get_user_embedding_as_key(user.uid)
-        file_enc = Encryption(path, key, db_data['suffix'])
-        self._recover(path, db_data['file'], key, file_enc.locked_path)
+        file_enc = Encryption(f'{path}.{db_data["suffix"]}', key, db_data['suffix'])
+        self._recover(f'{path}.{db_data["suffix"]}', db_data['file'], key, file_enc.locked_path)
+
+    @staticmethod
+    def raw_path(path):
+        return '.'.join(path.split('.')[:-1])

@@ -1,4 +1,4 @@
-from keys import KeyMap
+from terminal_ui.keys import KeyMap
 from logger import Logger
 
 
