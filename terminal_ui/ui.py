@@ -3,10 +3,12 @@ import pandas as pd
 
 from logger import Logger
 from messages import Messages as msg
-from keys import KeyMap
 from initialize import Init
 from database import Database
 from user_login import User
+
+from . keys import KeyMap
+
 
 commands = {KeyMap.exit_cmd: KeyMap.exit, KeyMap.add_cmd: KeyMap.add, KeyMap.remove_cmd: KeyMap.remove,
             KeyMap.delete_cmd: KeyMap.delete, KeyMap.trash_cmd: KeyMap.trash,

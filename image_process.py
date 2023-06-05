@@ -83,6 +83,7 @@ class Image(Init):
         Logger(msg.Requests.face_index, Logger.message).log()
         while True:
             cv.imshow(Camera.window_name, new_img)
+            cv.setMouseCallback(Camera.window_name, mouse_callback)
             cv.waitKey(1)
             if self.x_pos is None and self.y_pos is None:
                 continue

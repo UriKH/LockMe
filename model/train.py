@@ -12,9 +12,9 @@ import matplotlib.pyplot as plt
 
 from logger import Logger
 from dataset import ModelDataset
-from model.SNN import Net
-import model.config as config
-import model.model_utils as utils
+from SNN import Net
+import config
+import model_utils as utils
 
 
 def train(net, train_loader: DataLoader, valid_loader: DataLoader,

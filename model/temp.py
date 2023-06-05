@@ -1,7 +1,7 @@
 import shutil
 import sys
 from model.SNN import Net
-from model.dataset import ModelDataset
+from dataset import ModelDataset
 from model.SNN import Net
 import model.config as config
 import model.model_utils as utils

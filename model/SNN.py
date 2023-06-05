@@ -6,7 +6,7 @@ import torch.nn as nn
 import torchvision.transforms as transforms
 from PIL import Image
 import cv2 as cv
-import model.config as config
+import config
 
 
 class Net(nn.Module):

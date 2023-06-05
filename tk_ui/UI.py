@@ -10,24 +10,31 @@ from messages import Messages as msg
 from logger import Logger
 from initialize import Init
 from user_login import User
-from keys import KeyMap
 from database import Database
+
+from . keys import KeyMap
 
 
 class BaseWindow(tk.Tk):
+    """
+    The general app windows configuration
+    """
     def __init__(self, title):
         super().__init__()
         self.title(title)
 
-        # Apply a theme
         style = ttk.Style()
         self.resizable(True, True)
-        style.theme_use("clam")  # You can choose a different theme if desired
+        style.theme_use("clam")
         style.configure("Red.TButton", background="red")
         style.configure("Yellow.TButton", background="yellow")
         self.current_frame = None
 
     def switch_frame(self, new_frame):
+        """
+        Switch between 2 states of the application: the login and the main windows.
+        :param new_frame: the window to switch to
+        """
         if self.current_frame is not None:
             self.current_frame.destroy()
         self.current_frame = new_frame
@@ -40,6 +47,10 @@ class BaseWindow(tk.Tk):
 
 
 class LoginWindow(tk.Frame):
+    """
+    This class represents the login screen the user sees when opening the application using Tkinter
+    """
+
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
@@ -74,19 +85,25 @@ class LoginWindow(tk.Frame):
         return self.winfo_width(), self.winfo_height()
 
     def update_camera(self):
+        """
+        Update the camera every 10 milliseconds until image capture
+        """
         _, frame = self.camera.read()
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         image = ImageTk.PhotoImage(Image.fromarray(rgb_frame))
         self.label.configure(image=image)
         self.label.image = image
-        if not self.captured:  # Only update when not captured
-            self.after(10, self.update_camera)  # Update every 10 milliseconds
+        if not self.captured:
+            self.after(10, self.update_camera)
 
     def capture(self):
+        """
+        Captures a shot using the camera for further face detection processing
+        """
         self.captured = True
-        self.retake_button.configure(state=tk.NORMAL)  # Enable retake button
-        self.login_button.configure(state=tk.NORMAL)  # Enable login button
-        self.capture_button.configure(state=tk.DISABLED)  # Disable capture button
+        self.retake_button.configure(state=tk.NORMAL)
+        self.login_button.configure(state=tk.NORMAL)
+        self.capture_button.configure(state=tk.DISABLED)
 
         _, frame = self.camera.read()
         self.captured_image = frame
@@ -98,13 +115,19 @@ class LoginWindow(tk.Frame):
         self.label.image = image
 
     def retake(self):
+        """
+        Revert to retake state - activate the camera
+        """
         self.captured = False
-        self.retake_button.configure(state=tk.DISABLED)  # Disable retake button
-        self.login_button.configure(state=tk.DISABLED)  # Disable login button
-        self.capture_button.configure(state=tk.NORMAL)  # Enable capture button
-        self.update_camera()  # Resume updating the camera view
+        self.retake_button.configure(state=tk.DISABLED)
+        self.login_button.configure(state=tk.DISABLED)
+        self.capture_button.configure(state=tk.NORMAL)
+        self.update_camera()
 
     def login(self):
+        """
+        Try to log in the user. If successful - continues to the application's UI
+        """
         if self.captured:
             # Perform face verification using the captured image
             self.user = User(self.captured_image)
@@ -128,18 +151,19 @@ class LoginWindow(tk.Frame):
             if switch_win:
                 self.parent.switch_frame(MainWindow(self.parent, self.get_window_size(), self.user))
 
-    def clear_content(self):
-        self.frame.pack_forget()
-        self.button_frame.pack_forget()
-        self.login_button.pack_forget()
-        self.label.pack_forget()
-
     def destroy(self):
+        """
+        Destroys the current frame and the camera object
+        """
         self.camera.release()
         super().destroy()
 
 
 class MainWindow(tk.Frame):
+    """
+    This class represents the main screen of the application with which the user could preform various operations
+     on files.
+    """
     def __init__(self, parent, login_window_size, user):
         super().__init__(parent)
         self.parent = parent
@@ -152,6 +176,7 @@ class MainWindow(tk.Frame):
         self.button_frame = tk.Frame(self)
         self.button_frame.pack(padx=10, pady=10)
 
+        # create buttons
         self.buttons = {
             KeyMap.add_files: self.create_button,
             KeyMap.rm_files: self.create_button,
@@ -164,21 +189,29 @@ class MainWindow(tk.Frame):
 
         self.sidebar_buttons = []
         for button_text in self.buttons.keys():
-            button = ttk.Button(self.sidebar_frame, text=button_text, command=lambda text=button_text: self.switch_button_frame(text))
+            button = ttk.Button(self.sidebar_frame, text=button_text,
+                                command=lambda text=button_text: self.switch_button_frame(text))
             button.pack(pady=5)
             self.sidebar_buttons.append(button)
 
-        self.logout_button = ttk.Button(self.sidebar_frame, text=KeyMap.logout, style="Yellow.TButton", command=self.logout)
+        # create other special buttons
+        self.logout_button = ttk.Button(self.sidebar_frame, text=KeyMap.logout,
+                                        style="Yellow.TButton", command=self.logout)
         self.logout_button.pack(pady=10)
 
-        self.delete_user_button = ttk.Button(self.sidebar_frame, text=KeyMap.del_user, style="Red.TButton", command=self.delete_user)
+        self.delete_user_button = ttk.Button(self.sidebar_frame, text=KeyMap.del_user,
+                                             style="Red.TButton", command=self.delete_user)
         self.delete_user_button.pack()
 
         self.current_button_frame = None
-
         self.table_frame = None
 
     def create_button(self, button_text):
+        """
+        General structure for button creation
+        :param button_text: the title of the button
+        :return: the button's frame
+        """
         frame = tk.Frame(self.button_frame)
 
         add_files_label = tk.Label(frame, text=button_text)
@@ -188,6 +221,10 @@ class MainWindow(tk.Frame):
         return frame
 
     def switch_button_frame(self, button_text):
+        """
+        switch between the buttons frame when pressing different buttons
+        :param button_text: the title of the button
+        """
         if self.current_button_frame is not None:
             self.current_button_frame.destroy()
 
@@ -206,6 +243,11 @@ class MainWindow(tk.Frame):
                     self.table_frame = None
 
     def choose_files_ui(self, frame, command):
+        """
+        Creating a frane for selecting files
+        :param frame: the button's frame
+        :param command: the name of the command the button preforms
+        """
         file_listbox = tk.Listbox(frame, selectmode=tk.MULTIPLE, width=50, height=10)
         file_listbox.pack()
 
@@ -222,6 +264,11 @@ class MainWindow(tk.Frame):
         choose_files_button.pack()
 
     def run_command(self, paths, cmd):
+        """
+        Run the specified command function
+        :param paths: paths of files to preform the operation on
+        :param cmd: the command to run
+        """
         for path in paths:
             try:
                 if cmd == KeyMap.add_files:
@@ -247,6 +294,7 @@ class MainWindow(tk.Frame):
         """
         Present the data of the user
         :param data: a dictionary representing the user's data
+        :return: reformat the data: {file-path: (file suffix, file state)}
         """
         data = data.copy()
 
@@ -257,12 +305,14 @@ class MainWindow(tk.Frame):
         return {data['file_path'][i]: (data['suffix'][i], data['file_state'][i], ) for i in range(len(data['file_path']))}
 
     def create_show_status_frame(self, *args):
+        """
+        Create the user's files status table
+        """
         if self.table_frame is not None:
             return self.table_frame
 
         frame = tk.Frame(self.button_frame)
 
-        # Add your show status UI elements here
         show_status_label = tk.Label(frame, text="Show Status")
         show_status_label.pack()
 

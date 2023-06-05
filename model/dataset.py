@@ -112,7 +112,7 @@ class ModelDataset(Dataset):
         return canvas
 
     @staticmethod
-    def create_samples_from_folders(parent=r'C:\LockMe_DATA\temp', start=0):
+    def create_samples_from_folders(parent=r'C:\LockMe_DATA\temp', new_path=None, start=0):
         """
         Create a basic dataset from folders of images in form of the AT&T dataset
         :param parent: the parent directory of all subjects
@@ -123,25 +123,44 @@ class ModelDataset(Dataset):
             thresholds=[0.6, 0.7, 0.7], factor=0.709, post_process=True,
             device=device
         )
-        os.mkdir(r'C:\LockMe_DATA\temp_tag')
+        os.mkdir(new_path)
         people = os.listdir(parent)
+        images = 0
+
         index = start + 1
         for i, p in enumerate(people):
-            new_dir = os.path.join(r'C:\LockMe_DATA\temp_tag', f's{index}')
+            new_dir = os.path.join(new_path, f's{index}')
             os.makedirs(new_dir)
-            valid = True
-            for j, file in enumerate(os.listdir(os.path.join(parent, p))):
+            # valid = True
+            # for j, file in enumerate(os.listdir(os.path.join(parent, p))):
+            #     image = cv.imread(os.path.join(parent, p, file))
+            #     boxes, conf = mtcnn.detect(image)
+            #     if boxes is None or len(boxes) != 1:
+            #         print(f'oops, get another image for {os.path.join(parent, p, file)}!')
+            #         valid = False
+            #         break
+            #     boxes = boxes.astype(int)
+            #     boxes = [box for i, box in enumerate(boxes)]
+            #     frame = ModelDataset.create_image(image, boxes[0])
+            #     cv.imwrite(os.path.join(new_dir, f'{j + 1}.pgm'), frame)
+            # if not valid:
+            #     shutil.rmtree(new_dir)
+            sub_ind = 0
+            for file in os.listdir(os.path.join(parent, p)):
                 image = cv.imread(os.path.join(parent, p, file))
                 boxes, conf = mtcnn.detect(image)
                 if boxes is None or len(boxes) != 1:
-                    print(f'oops, get another image for {os.path.join(parent, p, file)}!')
-                    valid = False
-                    break
+                    # print(f'oops, get another image for {os.path.join(parent, p, file)}!')
+                    continue
                 boxes = boxes.astype(int)
                 boxes = [box for i, box in enumerate(boxes)]
                 frame = ModelDataset.create_image(image, boxes[0])
-                cv.imwrite(os.path.join(new_dir, f'{j + 1}.pgm'), frame)
-            if not valid:
+                cv.imwrite(os.path.join(new_dir, f'{sub_ind + 1}.pgm'), frame)
+                sub_ind += 1
+
+            images += sub_ind
+            print(f'images - till now: {images}, subjects: {index + 1}')
+            if sub_ind == 0:
                 shutil.rmtree(new_dir)
             else:
                 index += 1

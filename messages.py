@@ -48,6 +48,7 @@ class Messages:
         user_login = 'User logged in with ID'
         user_deleted = 'User removed from the system'
         login_distance_func = 'Login with distance as confidence:'
+        choose_ui = 'Do you want to continue using the terminal? [y/n]'
 
         menu = f"""Available commands:
  > {KeyMap.add_cmd}      [{KeyMap.add}] -> add a new file to the system

@@ -2,8 +2,9 @@ from camera_runner import Camera
 from messages import Messages as msg
 from user_login import User
 from logger import Logger
-import ui
 from initialize import Init
+
+from . import ui
 
 
 def main():

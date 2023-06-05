@@ -104,7 +104,7 @@ class Database:
     def _recover(self, path, comp_file, key, locked_path):
         """
         Recover a file from the database
-        :param path: path to the file
+        :param path: path to the file as it was originally add to the system
         :param comp_file: the compressed file as it is the database
         :param key: key to the fernet encryption
         :param locked_path: the path to the file with the locked suffix
@@ -191,7 +191,7 @@ class Database:
     def __validate_action_on_file(self, path: str, user):
         """
         Check if the file is accessible and the user could change it
-        :param path: path to the file
+        :param path: path to the file without suffix
         :param user: a User object
         :return: True if file is accessible else False
         """
@@ -311,7 +311,7 @@ class Database:
             self.connection.commit()
             return True
         except:
-            self._recover(path, db_data['file'], key, locked_path)
+            self._recover(f'{Database.raw_path(path)}.{db_data["suffix"]}', db_data['file'], key, locked_path)
 
     def unlock_file(self, path: str, user):
         """
@@ -354,7 +354,7 @@ class Database:
                 locked_path = file_enc.locked_path
                 file_enc.decrypt_file()
         except:
-            self._recover(path, db_data['file'], key, locked_path)
+            self._recover(f'{Database.raw_path(path)}.{db_data["suffix"]}', db_data['file'], key, locked_path)
 
     def lock_all_files(self, uid: int = None):
         """
@@ -444,7 +444,7 @@ class Database:
     def recover_file(self, path: str, user):
         """
         Recover a file from latest saved version
-        :param path: path to the file as it is saved in the system
+        :param path: path to the file
         :param user: a User object
         """
         # check if action is valid on the file
@@ -453,8 +453,8 @@ class Database:
             return False
 
         key = self.get_user_embedding_as_key(user.uid)
-        file_enc = Encryption(f'{path}.{db_data["suffix"]}', key, db_data['suffix'])
-        self._recover(f'{path}.{db_data["suffix"]}', db_data['file'], key, file_enc.locked_path)
+        file_enc = Encryption(f'{Database.raw_path(path)}.{db_data["suffix"]}', key, db_data['suffix'])
+        self._recover(f'{Database.raw_path(path)}.{db_data["suffix"]}', db_data['file'], key, file_enc.locked_path)
 
     @staticmethod
     def raw_path(path):
