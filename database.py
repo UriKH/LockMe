@@ -5,8 +5,8 @@ import struct
 from tqdm import tqdm
 
 from encryption import Encryption
-from logger import Logger
-from messages import Messages as msg
+from utils.logger import Logger
+from utils.messages import Messages as msg
 from terminal_ui.keys import KeyMap
 from model.SNN import Net
 # from user_login import User # could not import the User bcs of circular input...
@@ -419,13 +419,21 @@ class Database:
             self.connection.commit()
         print()  # this is a bug fix of tqdm covering the input line
 
-    def delete_user(self, uid: int):
+    def delete_user(self, uid: int, sure=False):
         """
         Delete a user from the system
         :param uid: the user ID
         :return: True if deleted and False if aborted
         """
         Logger(msg.Requests.delete_user, level=Logger.message).log()
+        if sure:
+            self.unlock_all_files(uid)
+            self.cursor.execute("DELETE FROM files WHERE uid = ?", (uid,))
+            self.cursor.execute("DELETE FROM users WHERE uid = ?", (uid,))
+            self.connection.commit()
+            Logger(msg.Info.user_deleted + f' - ID: {uid}', Logger.warning).log()
+            return True
+
         while True:
             ans = input('>>> ')
             if not ans.isalpha():

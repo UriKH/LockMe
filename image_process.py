@@ -1,18 +1,21 @@
 import cv2 as cv
 import numpy as np
 
-from initialize import Init
-from logger import Logger
-from messages import Messages as msg
+from utils.initialize import Init
+from utils.logger import Logger
+from utils.messages import Messages as msg
 from model.dataset import ModelDataset
+from camera_runner import Camera
 
 
 class Image(Init):
+    """
+    This class is used to compute and retrieve all the data from the image taken by the user
+    """
     conf_thresh = 0.9
 
     def __init__(self, image):
-        if Init.mtcnn is None or Init.net is None or Init.device is None:
-            super().__init__()
+        super().__init__()
         self.image = cv.cvtColor(image, cv.COLOR_BGR2RGB)
         self.embeddings_dict = {}
 
@@ -26,7 +29,7 @@ class Image(Init):
         Get the faces bounding boxes in the image
         :return: a list of the bounding boxes
         """
-        boxes, conf = Init.mtcnn.detect(self.image)
+        boxes, conf = self.mtcnn.detect(self.image)
         boxes = boxes.astype(int)
         new_boxes = []
         for i, box in enumerate(boxes):
@@ -50,16 +53,14 @@ class Image(Init):
         for box in self.__get_coords():
             x_aligned = ModelDataset.create_image(self.image, box)
             x_aligned = cv.cvtColor(x_aligned, cv.COLOR_GRAY2BGR)
-            processed = Init.net.preprocess_image(x_aligned)
-            embedding = Init.net.forward_once(processed.unsqueeze(0).to(Init.device))
+            processed = self.net.preprocess_image(x_aligned)
+            embedding = self.net.forward_once(processed.unsqueeze(0).to(self.device))
             self.embeddings_dict[tuple(box)] = np.squeeze(embedding.detach().numpy())
 
     def choose_face(self):
         """
         Choose a face to run on
         """
-        from camera_runner import Camera
-
         if len(self.embeddings_dict.keys()) == 1:
             Logger(msg.Info.single_face, Logger.warning).log()
             return list(self.embeddings_dict.values())[0]

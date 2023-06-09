@@ -1,6 +1,6 @@
-from . UI import *
-from initialize import Init
-from logger import Logger
+from tk_ui.UI import *
+from utils.initialize import Init
+from utils.logger import Logger
 
 
 def main():

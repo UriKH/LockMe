@@ -1,9 +1,9 @@
 import os
 import pandas as pd
 
-from logger import Logger
-from messages import Messages as msg
-from initialize import Init
+from utils.logger import Logger
+from utils.messages import Messages as msg
+from utils.initialize import Init
 from database import Database
 from user_login import User
 

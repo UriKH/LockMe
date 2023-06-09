@@ -1,6 +1,3 @@
-"""
-The Siamese Neural Network (SNN) model
-"""
 import torch
 import torch.nn as nn
 import torchvision.transforms as transforms
@@ -10,6 +7,9 @@ import config
 
 
 class Net(nn.Module):
+    """
+    The Siamese Neural Network (SNN) model
+    """
     embedding_size = 4096
 
     def __init__(self):

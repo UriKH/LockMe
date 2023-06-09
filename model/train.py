@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-import torchvision as tv
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 from torch import optim
@@ -10,7 +9,7 @@ import cv2 as cv
 import os
 import matplotlib.pyplot as plt
 
-from logger import Logger
+from utils.logger import Logger
 from dataset import ModelDataset
 from SNN import Net
 import config
@@ -168,6 +167,9 @@ def try_it(path=None):
         key = cv.waitKey(1)
         if key == ord('a'):
             boxes, conf = mtcnn.detect(frame)
+            if boxes is None:
+                print('try again')
+                continue
             boxes = boxes.astype(int)
             boxes = [box for i, box in enumerate(boxes) if conf[i] >= 0.85]
 
@@ -218,4 +220,5 @@ def train_parent():
 
 
 if __name__ == '__main__':
-    train_parent()
+    # train_parent()
+    try_it()

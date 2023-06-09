@@ -2,16 +2,20 @@ import torch
 import numpy as np
 
 from image_process import Image
-from initialize import Init
 from database import Database
-from logger import Logger
-from messages import Messages as msg
+from utils.initialize import Init
+from utils.logger import Logger
+from utils.messages import Messages as msg
 
 
-class User:
+class User(Init):
+    """
+    The class represents user object
+    """
     dist_thresh = 0.5
 
     def __init__(self, user_img):
+        super().__init__()
         self.img_data = Image(user_img)
         self.embedding = self.img_data.choose_face()
         self.uid = None
@@ -29,7 +33,7 @@ class User:
         dist = 0
         for uid, e in data:
             e = torch.from_numpy(np.array(list(e))).to(torch.float32)
-            dist = Init.net.forward_embeddings(e, self.embedding).item()
+            dist = self.net.forward_embeddings(e, self.embedding).item()
             if dist < min_dist:
                 min_dist = dist
                 identity = uid
@@ -43,7 +47,7 @@ class User:
         Try to log in with the current user
         :return: if the user is in the system or not
         """
-        data = Init.database.fetch_users()
+        data = self.database.fetch_users()
         for i, user in enumerate(data):
             data[i] = list(data[i])
             data[i][1] = Database._byte_to_embedding(user[1])

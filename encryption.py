@@ -4,12 +4,16 @@ from cryptography.fernet import Fernet
 import winreg
 import base64
 
-from logger import Logger
-from messages import Messages as msg
+from utils.logger import Logger
+from utils.messages import Messages as msg
 from model.SNN import Net
 
 
 class Encryption:
+    """
+    Handling encryption operations on files
+    """
+
     def __init__(self, path, key, suffix, is_db=False):
         self.key = key if not is_db else Encryption.__get_db_key()
         self.fernet = Fernet(self.key)

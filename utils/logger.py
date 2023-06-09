@@ -1,10 +1,10 @@
-"""
-Logging for terminal UI and debugging
-"""
 import time
 
 
 class Logger:
+    """
+    Logging for terminal interface and debugging
+    """
     message = 0
     info = 1
     warning = 2

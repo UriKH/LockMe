@@ -1,10 +1,13 @@
 import cv2 as cv
 from terminal_ui.keys import KeyMap
-from messages import Messages as msg
-from logger import Logger
+from utils.messages import Messages as msg
+from utils.logger import Logger
 
 
 class Camera:
+    """
+    Class for handling camera operations in the terminal interface
+    """
     default_size = 500
     window_name = 'cam view'
     freeze_color = (0, 255, 0)

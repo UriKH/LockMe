@@ -1,8 +1,8 @@
 from camera_runner import Camera
-from messages import Messages as msg
 from user_login import User
-from logger import Logger
-from initialize import Init
+from utils.logger import Logger
+from utils.initialize import Init
+from utils.messages import Messages as msg
 
 from . import ui
 

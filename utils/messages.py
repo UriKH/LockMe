@@ -1,5 +1,5 @@
 from terminal_ui.keys import KeyMap
-from logger import Logger
+from utils.logger import Logger
 
 
 class Messages:

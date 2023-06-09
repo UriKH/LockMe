@@ -6,9 +6,9 @@ import cv2
 from PIL import Image, ImageTk
 import os
 
-from messages import Messages as msg
-from logger import Logger
-from initialize import Init
+from utils.messages import Messages as msg
+from utils.logger import Logger
+from utils.initialize import Init
 from user_login import User
 from database import Database
 
@@ -342,8 +342,9 @@ class MainWindow(tk.Frame):
         self.parent.switch_frame(LoginWindow(self.parent))
 
     def delete_user(self):
-        Init.database.delete_user(self.user.uid)
+        Init.database.delete_user(self.user.uid, sure=True)
         Logger(msg.Info.logging_off, Logger.message).log()
+        self.parent.switch_frame(LoginWindow(self.parent))
 
     def destroy(self):
         if self.table_frame is not None:
