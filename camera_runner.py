@@ -19,7 +19,7 @@ class Camera:
         """
         self._v_cap = cv.VideoCapture(0)
         if self._v_cap is None:
-            Logger(msg.Errors.no_cam, Logger.error).log(Camera.__init__)
+            Logger(msg.Errors.no_cam, Logger.error).log()
 
         self._pic = None
         self._last_frame = None
@@ -58,10 +58,11 @@ class Camera:
         """
         Read a frame from the camera
         """
+        frame = None
         try:
             ret, frame = self._v_cap.read()
         except Exception as e:
-            Logger(f'{e}. Please rerun the program', Logger.error).log(self.read_stream)
+            Logger(f'{e}. Please rerun the program', Logger.error).log()
         self._pic = frame if frame is not None else self._last_frame
         self._last_frame = self._pic
 

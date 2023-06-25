@@ -23,7 +23,7 @@ class Net(nn.Module):
             nn.BatchNorm2d(64),
             nn.ReLU(inplace=True),
             nn.MaxPool2d((2, 2)),
-            nn.Dropout(0.6) # was 0.2
+            nn.Dropout(0.2)
         )
 
         self.conv_block2 = nn.Sequential(
@@ -31,7 +31,7 @@ class Net(nn.Module):
             nn.BatchNorm2d(128),
             nn.ReLU(inplace=True),
             nn.MaxPool2d((2, 2)),
-            nn.Dropout(0.6)
+            nn.Dropout(0.2)
         )
 
         self.conv_block3 = nn.Sequential(
@@ -39,7 +39,7 @@ class Net(nn.Module):
             nn.BatchNorm2d(128),
             nn.ReLU(inplace=True),
             nn.MaxPool2d((2, 2)),
-            nn.Dropout(0.6)
+            nn.Dropout(0.2)
         )
 
         self.conv_block4 = nn.Sequential(
@@ -75,7 +75,7 @@ class Net(nn.Module):
         # INPUT: 1 ,  105 x 105
         x = self.conv_block1(x)     # 64,  48  x 48
         x = self.conv_block2(x)     # 128, 21  x 21
-        x = self.conv_block3(x)     # 128, 9   x 9
+        x = self.conv_block3(x)      # 128, 9   x 9
         x = self.conv_block4(x)     # 256, 6   x 6
         x = x.view(-1, self.conv_output_size)
         x = self.fc(x)

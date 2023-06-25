@@ -32,7 +32,7 @@ def main():
                 # unrecognized person detected
                 join = ui.continue_to_system()
                 if join:
-                    user.uid = Init.database.create_new_user(user.embedding)
+                    user.uid = Init.database.create_new_user(user)
                     Logger(msg.Info.user_login + f' {user.uid}', msg.Info).log()
                     ui.present_menu(user)
                 else:

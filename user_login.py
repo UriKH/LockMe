@@ -2,7 +2,6 @@ import torch
 import numpy as np
 
 from image_process import Image
-from database import Database
 from utils.initialize import Init
 from utils.logger import Logger
 from utils.messages import Messages as msg
@@ -31,7 +30,7 @@ class User(Init):
         identity = None
 
         dist = 0
-        for uid, e in data:
+        for uid, e, _ in data:
             e = torch.from_numpy(np.array(list(e))).to(torch.float32)
             dist = self.net.forward_embeddings(e, self.embedding).item()
             if dist < min_dist:
@@ -50,6 +49,6 @@ class User(Init):
         data = self.database.fetch_users()
         for i, user in enumerate(data):
             data[i] = list(data[i])
-            data[i][1] = Database._byte_to_embedding(user[1])
+            data[i][1] = Init.database.byte_to_embedding(user[1])
         self.uid = self.check_similarity(data)
         return self.uid is not None

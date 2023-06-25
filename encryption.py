@@ -15,7 +15,7 @@ class Encryption:
     """
 
     def __init__(self, path, key, suffix, is_db=False):
-        self.key = key if not is_db else Encryption.__get_db_key()
+        self.key = key if not is_db else Encryption.__retrieve_registry_key(path='Software\\LockMe', key_name='db_key')
         self.fernet = Fernet(self.key)
 
         clean_path = '.'.join(path.split('.')[:-1])
@@ -57,7 +57,7 @@ class Encryption:
         return raw_data
 
     @staticmethod
-    def generate_key():
+    def _generate_key():
         """
         Generate a fernet encryption key
         :return: the key
@@ -65,7 +65,7 @@ class Encryption:
         return Fernet.generate_key()
 
     @staticmethod
-    def __get_db_key():
+    def __retrieve_registry_key(path: str, key_name: str):
         """
         Retrieve or generate the database encryption key and save it in the registry
         :return: The database encryption key
@@ -73,23 +73,23 @@ class Encryption:
         enc_key = None
         try:
             # try getting the key
-            reg_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, 'Software\\LockMe', 0, winreg.KEY_READ)
-            enc_key, value_type = winreg.QueryValueEx(reg_key, 'db_key')
+            reg_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, path, 0, winreg.KEY_READ)
+            enc_key, value_type = winreg.QueryValueEx(reg_key, key_name)
             winreg.CloseKey(reg_key)
         except WindowsError:
             Logger(msg.Info.new_db_key, Logger.info).log()
 
             # create the key
-            reg_key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, 'Software\\LockMe')
+            reg_key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, path)
 
-            enc_key = Encryption.generate_key().decode('utf-8')
+            enc_key = Encryption._generate_key().decode('utf-8')
             value_type = winreg.REG_SZ
 
             # Set the values for the key
-            winreg.SetValueEx(reg_key, 'db_key', 0, value_type, enc_key)
+            winreg.SetValueEx(reg_key, key_name, 0, value_type, enc_key)
             winreg.CloseKey(reg_key)
         except not WindowsError:
-            Logger(msg.Errors.db_no_enc_key, level=Logger.exception).log(Encryption.__get_db_key)
+            Logger(msg.Errors.db_no_enc_key, level=Logger.exception).log()
 
         if enc_key is None:
             Logger(msg.Errors.BUG, level=Logger.error).log()

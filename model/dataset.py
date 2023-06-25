@@ -2,12 +2,10 @@ import os
 import random
 import shutil
 import sys
-
 import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
 import cv2 as cv
-
 import torch
 from torch.utils.data import Dataset, DataLoader, random_split
 import torchvision.datasets as datasets
@@ -62,18 +60,6 @@ class ModelDataset(Dataset):
     def __len__(self):
         return len(self.dataset.imgs)
 
-    def split_dataset(self):
-        # Compute the number of samples for train/validation split
-        num_samples = len(self.dataset)
-        num_train = int(self.train_ratio * num_samples)
-        num_valid = num_samples - num_train
-
-        # Perform the train/validation split
-        train_dataset, valid_dataset = random_split(self, [num_train, num_valid])
-        train_loader = DataLoader(train_dataset, batch_size=config.BATCH_SIZE, shuffle=True, num_workers=utils.get_workers())
-        valid_loader = DataLoader(valid_dataset, batch_size=config.BATCH_SIZE, shuffle=False, num_workers=utils.get_workers())
-        return train_loader, valid_loader
-
     @staticmethod
     def create_image(image, box):
         """
@@ -103,9 +89,12 @@ class ModelDataset(Dataset):
             height = 300
         cut = cv.resize(cut, (width, height))
 
+        # create a white canvas
         canvas = np.ones((300, 300, 3), dtype=np.uint8) * 255
         start_x = (300 - width) // 2
         start_y = (300 - height) // 2
+
+        # position the cropped face in the middle of the canvas
         canvas[start_y: start_y + height, start_x: start_x + width] = cut
 
         canvas = cv.cvtColor(canvas, cv.COLOR_BGR2GRAY)
@@ -166,17 +155,17 @@ class ModelDataset(Dataset):
                 index += 1
 
     @staticmethod
-    def filter_ds(path_to_lfw, new_base_path, lower=1, upper=sys.maxsize):
+    def filter_ds(path_to_ds, new_base_path, lower=1, upper=sys.maxsize):
         """
-        Filter the LFW database for subjects with more images that the threshold
-        :param path_to_lfw: the path to the current LFW folder
+        Filter the dataset for subjects with as many or more images than the threshold
+        :param path_to_ds: the path to the current dataset folder
         :param new_base_path: path to the filtered dataset
         :param lower: the minimum amount of samples
         :param upper: the maximum amount of samples
         """
-        folders = os.listdir(path_to_lfw)
+        folders = os.listdir(path_to_ds)
         for folder in folders:
-            dir_path = os.path.join(path_to_lfw, folder)
+            dir_path = os.path.join(path_to_ds, folder)
             if lower <= len(os.listdir(dir_path)) <= upper:
                 os.mkdir(os.path.join(new_base_path, folder))
                 for file in os.listdir(dir_path):
@@ -213,6 +202,7 @@ class ModelDataset(Dataset):
     def cam_face_generation(self, path=None):
         """
         Generate face from the camera
+        :param path: path to the output folder
         """
 
         if path is None:
@@ -265,7 +255,7 @@ class ModelDataset(Dataset):
         """
         Transfer the current dataset to another folder and augment the images
         :param new_ds_path: path to the new dataset folder
-        :param discover: discover faces from raw images
+        :param discover: discover faces from raw images - images not in the right format
         """
         device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         mtcnn = MTCNN(
@@ -281,6 +271,7 @@ class ModelDataset(Dataset):
                 os.makedirs(os.path.join(new_ds_path, folder))
             for i in range(1, len(os.listdir(os.path.join(self.ds_path, folder))) + 1):
                 length = len(os.listdir(os.path.join(self.ds_path, folder)))
+
                 old_path = os.path.join(self.ds_path, folder, f'{i}.pgm')
                 new_path = os.path.join(new_ds_path, folder, f'{i}.pgm')
                 new_path_bright = os.path.join(new_ds_path, folder, f'{i + length}.pgm')
@@ -296,6 +287,7 @@ class ModelDataset(Dataset):
                     boxes = boxes.astype(int)
                     boxes = [box for i, box in enumerate(boxes) if conf[i] >= 0.95]
 
+                # augment the image
                 darkened = cv.convertScaleAbs(frame, alpha=1.1, beta=0)
                 brightened = cv.convertScaleAbs(frame, alpha=0.7, beta=0)
 

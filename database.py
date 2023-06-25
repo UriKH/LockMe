@@ -3,13 +3,15 @@ import os
 import bz2 as bz
 import struct
 from tqdm import tqdm
+import numpy as np
+import cv2 as cv
 
 from encryption import Encryption
 from utils.logger import Logger
 from utils.messages import Messages as msg
 from terminal_ui.keys import KeyMap
 from model.SNN import Net
-# from user_login import User # could not import the User bcs of circular input...
+# could not import the User bcs of circular input...
 
 
 class Database:
@@ -31,8 +33,6 @@ class Database:
 
         self.__init_tables()    # create the tables
 
-        self.users = self.fetch_users()
-
     def __del__(self):
         """
         Encrypt the DB before termination
@@ -48,7 +48,8 @@ class Database:
         self.cursor.execute(
             "CREATE TABLE IF NOT EXISTS users("
             "uid INTEGER PRIMARY KEY,"
-            "user_embedding TEXT)"
+            "user_embedding TEXT,"
+            "user_image TEXT)"
         )
         self.cursor.execute(
             "CREATE TABLE IF NOT EXISTS files("
@@ -92,7 +93,7 @@ class Database:
         return embedding_b
 
     @staticmethod
-    def _byte_to_embedding(embedding_b):
+    def byte_to_embedding(embedding_b):
         """
         Transform bytes type embedding to a float list
         :param embedding_b: the bytes type embedding
@@ -128,7 +129,7 @@ class Database:
         self.cursor.execute("SELECT * FROM users")
         return self.cursor.fetchall()
 
-    def _fetch_all_ids(self):
+    def fetch_all_ids(self):
         """
         Fetch all user IDs from the DB
         :return: the retrieved IDs
@@ -157,22 +158,23 @@ class Database:
             data_dict['file_state'].append(row[4])
         return data_dict
 
-    def create_new_user(self, embedding: list):
+    def create_new_user(self, user):
         """
         ADD a new user to the system
-        :param embedding: an embedding vector of the user's face
+        :param user: a User object
         :return: the new user's ID
         """
-        embedding_b = Database._embedding_to_byte(embedding)
-        uids = self._fetch_all_ids()
+        embedding_b = Database._embedding_to_byte(user.embedding)
+        uids = self.fetch_all_ids()
         max_id = 0
-        for row in uids:     # because uids is of shape (n, )
+        for row in uids:     # because UIDs is of shape (n, )
             uid = row[0]
             if uid > max_id:
                 max_id = uid
 
-        self.cursor.execute("INSERT INTO users (uid, user_embedding) VALUES (?,?)",
-                            (max_id + 1, embedding_b))
+        image = user.img_data.image.copy()
+        self.cursor.execute("INSERT INTO users (uid, user_embedding, user_image) VALUES (?,?,?)",
+                            (max_id + 1, embedding_b, image.tobytes()))
         self.connection.commit()
         return max_id + 1
 
@@ -184,7 +186,7 @@ class Database:
         """
         self.cursor.execute("SELECT user_embedding FROM users WHERE uid = ?", (uid,))
         embedding_b = self.cursor.fetchall()[0][0]
-        embedding = Database._byte_to_embedding(embedding_b)
+        embedding = Database.byte_to_embedding(embedding_b)
         key = Encryption.key_from_embedding(list(embedding))
         return key
 
@@ -206,7 +208,7 @@ class Database:
             if path == row[0]:
                 if row[1] != user.uid:
                     Logger(msg.Errors.access_denied + f' to file {path}', Logger.inform).log()
-                    return False
+                    return False, None
                 found = True
                 suffix = row[2]
                 comp_file = row[3]
@@ -214,10 +216,10 @@ class Database:
                 break
         if not found:
             Logger(msg.Errors.failed_removal, Logger.inform).log()
-            return False
+            return False, None
         return True, {'file_path': path, 'uid': user.uid, 'suffix': suffix, 'file': comp_file, 'file_state': file_state}
 
-    def add_file(self, path: str, user):
+    def add_file(self, path: str, user) -> bool:
         """
         Add a file to the DB
         :param path: the path to the file to be added
@@ -248,7 +250,7 @@ class Database:
 
         if suffix == 'locked':
             Logger(msg.Errors.unsupported_file_type + f' (.{suffix})', Logger.inform).log()
-            return True
+            return False
 
         enc_data = Encryption.encrypt_data(data, key)
         comp_data = Database._compress_data(enc_data)
@@ -259,7 +261,7 @@ class Database:
         Logger(msg.Info.file_added + f' {path}', Logger.info).log()
         return True
 
-    def remove_file(self, path: str, user):
+    def remove_file(self, path: str, user) -> bool:
         """
         Remove a file from the DB
         :param path: the path to the file to remove
@@ -279,7 +281,7 @@ class Database:
         Logger(msg.Info.file_removed + f' {path}', Logger.info).log()
         return True
 
-    def lock_file(self, path: str, user):
+    def lock_file(self, path: str, user) -> bool:
         """
         Encrypt a file and update the backup to the latest version
         :param path: the path to the file
@@ -312,8 +314,9 @@ class Database:
             return True
         except:
             self._recover(f'{Database.raw_path(path)}.{db_data["suffix"]}', db_data['file'], key, locked_path)
+            return False
 
-    def unlock_file(self, path: str, user):
+    def unlock_file(self, path: str, user) -> bool:
         """
         Decrypts a file
         :param path: path to the file
@@ -419,7 +422,7 @@ class Database:
             self.connection.commit()
         print()  # this is a bug fix of tqdm covering the input line
 
-    def delete_user(self, uid: int, sure=False):
+    def delete_user(self, uid: int, sure=False) -> bool:
         """
         Delete a user from the system
         :param uid: the user ID
@@ -449,7 +452,7 @@ class Database:
             elif ans == KeyMap.no:
                 return False
 
-    def recover_file(self, path: str, user):
+    def recover_file(self, path: str, user) -> bool:
         """
         Recover a file from latest saved version
         :param path: path to the file
@@ -463,7 +466,17 @@ class Database:
         key = self.get_user_embedding_as_key(user.uid)
         file_enc = Encryption(f'{Database.raw_path(path)}.{db_data["suffix"]}', key, db_data['suffix'])
         self._recover(f'{Database.raw_path(path)}.{db_data["suffix"]}', db_data['file'], key, file_enc.locked_path)
+        return True
 
     @staticmethod
     def raw_path(path):
         return '.'.join(path.split('.')[:-1])
+
+    def get_user_image(self, uid, dims, convert_rgb=False):
+        self.cursor.execute('SELECT user_image FROM users WHERE uid = ?', (uid,))
+        result = self.cursor.fetchone()
+        image_bytes = result[0]
+        image_np = np.frombuffer(image_bytes, dtype=np.uint8).reshape(dims)
+        if convert_rgb:
+            image_np = cv.cvtColor(image_np, cv.COLOR_BGR2RGB)
+        return image_np

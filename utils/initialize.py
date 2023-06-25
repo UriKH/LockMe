@@ -1,4 +1,3 @@
-import os
 from facenet_pytorch import MTCNN
 import torch
 
@@ -38,3 +37,4 @@ class Init:
             Init.net = Net()
             state_dict = torch.load(config.MODEL_PATH)
             Init.net.load_state_dict(state_dict)
+
