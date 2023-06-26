@@ -10,8 +10,7 @@ Login is via face detection, thus make sure you have a camera connected to your 
 To activate the system follow these steps:
 1. run: `pip install cmake`
 2. then run: `pip install -r requirements.txt`
-3. use a Unix-based system to rebuild the model from parts in the **_model/model_parts_** directory using the command: 
-`cat model.part* > model.pth`
+3. use a Unix-based system to rebuild the model from parts in the **_model/model_parts_** directory using the command:`cat model.part* > model.pth`
 4. make sure the model name is written with the correct path in the configurations file in the model's directory
 5. you are then ready to run: `python main.py`
 
@@ -30,7 +29,7 @@ To activate the system follow these steps:
   3. darkening
 * To recreate a similar dataset use the functions in the **model/dataset.py** file.
 #### Labels definition:
-* `1` - for smpleds of different subjects
+* `1` - for samples of different subjects
 * `0` - for samples of the same subject
 #### examples:
 1. image pairs: ![example1.png](images/example1.png)
@@ -48,3 +47,5 @@ but BCE gave me the best results with the amount of data that I had.
 Here below is the loss and accuracy of the model after 50 epochs:
 
 ![img.png](images/img.png)
+
+### ~WIP~
