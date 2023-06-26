@@ -1,9 +1,0 @@
-keras_facenet
-facenet_pytorch
-torch
-torchvision
-torchsummary
-tensorflow
-numpy
-opencv-python
-pandas
