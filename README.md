@@ -16,7 +16,11 @@ To activate the system follow these steps:
 5. you are then ready to run: `python main.py`
 
 ### running example
+#### Terminal UI view:
 ![terminal_view.png](images/terminal_view.png)
+#### Tkinter based GUI view:
+![gui_view.png](images/tkinter_usage.png)
+
 
 ### Dataset:
 * The **dataset** is a combination of samples I transformed from AT&T, LFW and my own images.
