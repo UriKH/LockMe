@@ -9,11 +9,11 @@ from tk_ui.ui import Window
 from tk_ui.main_windows import LoginWindow
 
 
-goals = """ The goal of this project is to help solving the security problem of files in shared computers.
+goals_msg = """ The goal of this project is to help solving the security problem of files in shared computers.
  The future app is planed to include cloud management of the users, folder encryption, facial recognition 
  liveness check and advanced user file recovery methods.
 """
-description = """ This is the prototype of the LockMe application. 
+description_msg = """ This is the prototype of the LockMe application. 
  LockMe is a python application in development stages for individuals who share their computer with others
  and want to keep their files safe and secure. 
  LockMe provides encryption service based on facial recognition and CBC (Cypher Block Chaining) using 
@@ -29,16 +29,25 @@ description = """ This is the prototype of the LockMe application.
   7. Using command line interface
 """
 
-model = """ The model architecture used in this project is the siamese architecture as presented in the paper as can
- be seen in the following scheme: 
+model_msg = """ The model architecture used in this project is the siamese architecture as presented in the paper. 
+ The model architecture can be seen in the following scheme: 
  """
 
-training = """The model is trained using BCE (Binary Cross Entropy) loss function. 
- The model was trained using learning rate 0.0006 and batch size 128 for ___ epochs using the Adam 
- optimizer. Also the batch normalization and learning rate exponential decay (0.99) methods were used. 
- The model was trained on the dataset CelebA with train-test ratio of 85%-15%.
- Some example images from the dataset after transformation (0 - same subject, 1 - different subjects):
+training_msg_1 = """ The model is trained using BCE (Binary Cross Entropy) loss function. 
+ The model was trained using learning rate 0.0006 and batch size 128 for 50 epochs using the Adam 
+ optimizer. Also the batch normalization method was used. 
+ The model was trained on the combined dataset of LFW, AT&T and some images taken by Uri K.H.
+ The train-test ratio of the dataset after augmentations is 92%-8% (total of 33,275 images).
+ Some example images from the dataset after augmentation (0 - same subject, 1 - different subjects):
  """
+
+training_msg_2 = """ The model has 98% accuracy on the train set and just over 80% on the test set. 
+ More sophisticated models are still in testing stages. Now in testings are being conducted on the 
+ VGG19/16 and Inception-resnet-v2 in Siamese NN and in Triplet Loss usage. 
+ The testing datasets are LFW and CelebA (testing code notebook could be found on
+ github: https://github.com/UriKH/LockMe_Face-Recognition). 
+ 
+ In the example below are some pairs of the augmented CelebA dataset:"""
 
 
 class InfoWindow(tk.Frame, Window):
@@ -95,18 +104,29 @@ class InfoWindow(tk.Frame, Window):
 
         self.text.configure(state="normal")  # Enable editing temporarily
 
-        self.text.insert(tk.END, ' Wellcome to LockMe service\n', 'headline1')
+        self.text.insert(tk.END, ' ', 'text')
+        self.text.insert(tk.END, 'Wellcome to LockMe service\n', 'headline1')
         self.text.insert(tk.END, ' Goals\n', 'headline2')
-        self.text.insert(tk.END, goals + '\n', 'text')
+        # goals of the project
+        self.text.insert(tk.END, goals_msg + '\n', 'text')
         self.text.insert(tk.END, ' Description\n', 'headline2')
-        self.text.insert(tk.END, description + '\n', 'text')
+        # description of the project
+        self.text.insert(tk.END, description_msg + '\n', 'text')
         self.text.insert(tk.END, ' About\n', 'headline2')
-        self.text.insert(tk.END, ' - The model\n', 'headline3')
-        self.text.insert(tk.END, model + '\n', 'text')
+        self.text.insert(tk.END, ' The model\n', 'headline3')
+        # model description part
+        self.text.insert(tk.END, model_msg + '\n', 'text')
         self.add_image(os.path.join(os.getcwd(), 'images', 'siamese_model.png'), 'big')
-        self.text.insert(tk.END, '\n - Training\n', 'headline3')
-        self.text.insert(tk.END, training + '\n', 'text')
-        self.add_image(os.path.join(os.getcwd(), 'images', 'CelebA_transformed.png'), 'medium')
+        self.text.insert(tk.END, '\n Training\n', 'headline3')
+        # training part
+        self.text.insert(tk.END, training_msg_1 + '\n', 'text')
+        self.add_image(os.path.join(os.getcwd(), 'images', 'example1.png'), 'small')
+        self.text.insert(tk.END, ' [0    1    0    0    1    0    0    1]\n\n', 'text')
+        self.add_image(os.path.join(os.getcwd(), 'images', 'example2.png'), 'small')
+        self.text.insert(tk.END, ' [0    0    0    1    0    0    1    1]\n\n', 'text')
+        self.text.insert(tk.END, training_msg_2 + '\n', 'text')
+        self.add_image(os.path.join(os.getcwd(), 'images', 'celeb_a_transformed.png'), 'small')
+        self.text.insert(tk.END, ' [0    1    0    1    0    0    0    1]\n\n', 'text')
 
         self.text.configure(state="disabled")  # Disable editing again
 

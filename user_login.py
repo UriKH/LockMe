@@ -1,5 +1,6 @@
 import torch
 import numpy as np
+import sys
 
 from image_process import Image
 from utils.initialize import Init
@@ -18,6 +19,8 @@ class User(Init):
         self.img_data = Image(user_img)
         self.embedding = self.img_data.choose_face()
         self.uid = None
+
+        self.score = sys.maxsize
         self.valid = self.login()
 
     def check_similarity(self, data: list):
@@ -36,9 +39,10 @@ class User(Init):
             if dist < min_dist:
                 min_dist = dist
                 identity = uid
-        if min_dist > User.dist_thresh:
+        if min_dist >= User.dist_thresh:
             identity = None
-        Logger(msg.Info.login_distance_func + f' {dist:.2f}', Logger.info).log()
+        self.score = min_dist
+        Logger(msg.Info.login_distance_func + f' {min_dist:.2f}', Logger.info).log()
         return identity
 
     def login(self):

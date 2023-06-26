@@ -62,6 +62,7 @@ class LoginWindow(tk.Frame, Init, Window):
         """
         _, frame = self.camera.read()
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        rgb_frame = cv2.flip(rgb_frame, 1)
         image = ImageTk.PhotoImage(Image.fromarray(rgb_frame))
         self.label.configure(image=image)
         self.label.image = image
@@ -82,6 +83,7 @@ class LoginWindow(tk.Frame, Init, Window):
         self.image_dims = self.captured_image.shape
 
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        rgb_frame = cv2.flip(rgb_frame, 1)
         captured_image = Image.fromarray(rgb_frame)
         image = ImageTk.PhotoImage(captured_image)
         self.label.configure(image=image)
@@ -133,8 +135,7 @@ class LoginWindow(tk.Frame, Init, Window):
         self.camera.release()
         super().destroy()
 
-    @staticmethod
-    def show_image_message(image_np, uid):
+    def show_image_message(self, image_np, uid):
         # Create a new Toplevel window
         window = tk.Toplevel()
 
@@ -153,7 +154,7 @@ class LoginWindow(tk.Frame, Init, Window):
         image_label.pack()
 
         # Create a message label
-        message = f"Hi there and welcome user {uid} [UID]"
+        message = f"Hi there and welcome user {uid}, score: {self.user.score:.2f}"
         draw = ImageDraw.Draw(pil_image)
 
         # Set the rectangle parameters

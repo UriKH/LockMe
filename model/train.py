@@ -212,8 +212,8 @@ def train_parent():
     # define data transformation
     transformation = transforms.Compose([
         transforms.Resize(config.INPUT_SIZE),
-        transforms.ToTensor()]
-    )
+        transforms.ToTensor()
+    ])
 
     # load the dataset for training and validation
     train_ds = ModelDataset(root=config.TRAIN_DATASET_PATH, transform=transformation)

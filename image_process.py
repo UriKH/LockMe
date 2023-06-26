@@ -75,7 +75,7 @@ class Image(Init):
         cv.setMouseCallback(Camera.window_name, mouse_callback)
 
         # draw an index box of the face
-        new_img = self.image
+        new_img = self.image.copy()
         for i, (x1, y1, x2, y2) in enumerate(self.embeddings_dict.keys()):
             cv.rectangle(new_img, (x1, y1), (x2, y2), (0, 0, 255), 2)
             cv.rectangle(new_img, (x1 - 1, y2 - 35), (x2 + 1, y2), (0, 0, 255), cv.FILLED)
@@ -90,6 +90,7 @@ class Image(Init):
                 continue
             for i, (x1, y1, x2, y2) in enumerate(self.embeddings_dict.keys()):
                 if x1 <= self.x_pos <= x2 and y1 <= self.y_pos <= y2:
+                    cv.destroyAllWindows()
                     return list(self.embeddings_dict.values())[i]
             self.x_pos, self.y_pos = None, None
             Logger(msg.Errors.no_face_click, Logger.warning).log()
