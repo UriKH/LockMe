@@ -18,7 +18,7 @@ To activate the system follow these steps:
 #### Terminal UI view:
 ![terminal_view.png](images/terminal_view.png)
 #### Tkinter based GUI view:
-![gui_view.png](images/tkinter_usage.png)
+![tkinter_usage.png](images/tkinter_usage.png)
 
 
 ### Dataset:
