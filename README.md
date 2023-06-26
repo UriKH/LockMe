@@ -48,4 +48,4 @@ Here below is the loss and accuracy of the model after 50 epochs:
 
 ![img.png](images/img.png)
 
-### ~WIP~
+### - WIP -
