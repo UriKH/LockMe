@@ -203,9 +203,10 @@ class Database:
         file_state = None
         comp_file = None
 
+        path = Database.formalize_path(path)
         found = False
         for row in res:
-            if path == row[0]:
+            if path == Database.formalize_path(row[0]):
                 if row[1] != user.uid:
                     Logger(msg.Errors.access_denied + f' to file {path}', Logger.inform).log()
                     return False, None
@@ -229,6 +230,7 @@ class Database:
         # check if the file is already in the database
         self.cursor.execute("SELECT file_path, uid FROM files")
         res = self.cursor.fetchall()
+        path = Database.formalize_path(path)
         for row in res:
             if Database.raw_path(path) == row[0]:
                 Logger(msg.Errors.failed_insertion + f' - owner ID: {row[1]}', Logger.inform).log()
@@ -269,6 +271,7 @@ class Database:
         :return: True if the file removed successfully
         """
         # check if action is valid on the file
+        path = Database.formalize_path(path)
         valid, db_data = self.__validate_action_on_file(Database.raw_path(path), user)
         if not valid:
             return False
@@ -289,6 +292,7 @@ class Database:
         :return: True if encrypted successfully
         """
         # check if action is valid on the file
+        path = Database.formalize_path(path)
         valid, db_data = self.__validate_action_on_file(Database.raw_path(path), user)
         if not valid:
             return False
@@ -298,6 +302,7 @@ class Database:
             Logger(msg.Info.file_encrypt).log()
             return True
 
+        path = '\\'.join(path.split('/') if path.split('\\')[0] == path else path.split('\\'))
         key = self.get_user_embedding_as_key(db_data['uid'])
         # encrypt the file
         file_enc = Encryption(path, key, db_data['suffix'])
@@ -323,6 +328,7 @@ class Database:
         :param user: a User object
         """
         # check if action is valid on the file
+        path = Database.formalize_path(path)
         valid, db_data = self.__validate_action_on_file(Database.raw_path(path), user)
         if not valid:
             return False
@@ -332,6 +338,7 @@ class Database:
             Logger(msg.Info.file_decrypt).log()
             return True
 
+        path = '\\'.join(path.split('/') if path.split('\\')[0] == path else path.split('\\'))
         self.decrypt_user_file(path, user, db_data)
 
         # change the file state in the database
@@ -349,6 +356,7 @@ class Database:
         """
         key = self.get_user_embedding_as_key(user.uid)
         locked_path = None
+        path = Database.formalize_path(path)
 
         # decrypt the file if encrypted
         try:
@@ -380,6 +388,7 @@ class Database:
                     continue
 
             # encrypt the file
+            path = Database.formalize_path(path)
             key = self.get_user_embedding_as_key(data_dict['user_id'][i])
             file_enc = Encryption(f'{path}.{data_dict["suffix"][i]}', key, data_dict['suffix'][i])
             enc_data = file_enc.encrypt_file(log=False)
@@ -412,6 +421,7 @@ class Database:
                     continue
 
             # encrypt the file
+            path = Database.formalize_path(path)
             key = self.get_user_embedding_as_key(data_dict['user_id'][i])
             file_enc = Encryption(f'{path}.{data_dict["suffix"][i]}', key, data_dict['suffix'][i])
             file_enc.decrypt_file(log=False)
@@ -422,10 +432,11 @@ class Database:
             self.connection.commit()
         print()  # this is a bug fix of tqdm covering the input line
 
-    def delete_user(self, uid: int, sure=False) -> bool:
+    def delete_user(self, uid: int, sure: bool = False) -> bool:
         """
         Delete a user from the system
         :param uid: the user ID
+        :param sure: if user is sure to delete all files
         :return: True if deleted and False if aborted
         """
         Logger(msg.Requests.delete_user, level=Logger.message).log()
@@ -459,6 +470,7 @@ class Database:
         :param user: a User object
         """
         # check if action is valid on the file
+        path = Database.formalize_path(path)
         valid, db_data = self.__validate_action_on_file(Database.raw_path(path), user)
         if not valid:
             return False
@@ -468,10 +480,6 @@ class Database:
         self._recover(f'{Database.raw_path(path)}.{db_data["suffix"]}', db_data['file'], key, file_enc.locked_path)
         return True
 
-    @staticmethod
-    def raw_path(path):
-        return '.'.join(path.split('.')[:-1])
-
     def get_user_image(self, uid, dims, convert_rgb=False):
         self.cursor.execute('SELECT user_image FROM users WHERE uid = ?', (uid,))
         result = self.cursor.fetchone()
@@ -480,3 +488,11 @@ class Database:
         if convert_rgb:
             image_np = cv.cvtColor(image_np, cv.COLOR_BGR2RGB)
         return image_np
+
+    @staticmethod
+    def formalize_path(path):
+        return path if path.split('\\')[0] != path else '\\'.join(path.split('/'))
+
+    @staticmethod
+    def raw_path(path):
+        return '.'.join(path.split('.')[:-1])
