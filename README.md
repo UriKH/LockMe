@@ -46,6 +46,6 @@ but BCE gave me the best results with the amount of data that I had.
 * The final result is 80% accuracy. 
 
 #### WIP ans further work:
-* Training on CelebA dataset.
+* Training on CelebA dataset (use complex pairs)
 * Try architecture: InceptionResNet-V2
 * Try triplet loss
