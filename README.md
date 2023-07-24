@@ -43,9 +43,9 @@ labels: `[0. 0. 0. 1. 0. 0. 1. 1.]`
 * I tried a few models and loss functions such as triplet loss and contrastive loss with different learning rates 
 but BCE gave me the best results with the amount of data that I had.
 * The model is trained for 50 epochs and learning rate of 0.0006 using batch size 128.
+* The final result is 80% accuracy. 
 
-Here below is the loss and accuracy of the model after 50 epochs:
-
-![img.png](images/img.png)
-
-### - WIP -
+#### WIP:
+* Training on CelebA dataset.
+* Try architecture: InceptionResNet-V2
+* Try triplet loss
