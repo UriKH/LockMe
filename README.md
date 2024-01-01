@@ -10,7 +10,7 @@ Login is via face detection, thus make sure you have a camera connected to your 
 To activate the system follow these steps:
 1. run: `pip install cmake`
 2. then run: `pip install -r requirements.txt`
-3. use a Unix-based system to rebuild the model from parts in the **_model/model_parts_** directory using the command:`cat model.part* > model.pth`
+3. use a linux CMD to rebuild the model from parts in the **_model/model_parts_** directory using the command:`cat model.part* > model.pth`
 4. make sure the model name is written with the correct path in the configurations file in the model's directory
 5. you are then ready to run: `python main.py`
 
